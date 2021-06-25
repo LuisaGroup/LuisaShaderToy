@@ -7,3 +7,6 @@
 [submodule "src/ext/imgui/imgui"]
 	path = src/ext/imgui/imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "src/ext/stb/stb"]
+	path = src/ext/stb/stb
+	url = https://github.com/nothings/stb.git
