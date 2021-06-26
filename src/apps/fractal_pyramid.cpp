@@ -3,6 +3,8 @@
 //
 
 #include <dsl/syntax.h>
+#include <gui/framerate.h>
+#include <gui/gl_texture.h>
 #include <gui/window.h>
 #include <runtime/context.h>
 #include <runtime/device.h>
@@ -12,6 +14,13 @@
 using namespace luisa;
 using namespace luisa::gui;
 using namespace luisa::compute;
+
+template<typename F>
+void with_panel(const char *name, ImGuiWindowFlags flags, F &&f) {
+    ImGui::Begin(name, nullptr, flags);
+    f();
+    ImGui::End();
+}
 
 int main(int argc, char *argv[]) {
 
@@ -87,35 +96,39 @@ int main(int argc, char *argv[]) {
 
     device.compile(clear, shader);
 
-    static constexpr auto width = 512u;
-    static constexpr auto height = 512u;
-    static constexpr auto fps = 24.0f;
-    static constexpr auto frame_time = 1.0f / fps;
+    static constexpr auto width = 1280u;
+    static constexpr auto height = 720u;
     auto device_image = device.create_image<float>(PixelStorage::BYTE4, width, height);
-    std::vector<uint8_t> host_image(width * height * 4u, 0u);
 
     auto stream = device.create_stream();
     stream << clear(device_image).launch(width, height);
 
     Window window{"Fractal Pyramid", width, height};
-    Window another{"Another", width, height};
+    GLTexture texture{PixelFormat::RGBA8UNorm, width, height};
 
-    auto frame = 0u;
-
-    while (!window.should_close() || !another.should_close()) {
-        window.with_frame([&] {
-            stream << shader(device_image, static_cast<float>(frame) * frame_time).launch(width, height)
-                   << device_image.copy_to(host_image.data());
+    Clock clock;
+    Framerate framerate;
+    window.run([&] {
+        auto window_size = window.size();
+        if (!all(device_image.size() == window_size)) {
+            device_image = device.create_image<float>(PixelStorage::BYTE4, window_size);
+            stream << clear(device_image).launch(window_size);
+            texture.resize(window_size);
+        }
+        texture.with_pixels_uploading([&](void *pixels) noexcept {
+            stream << shader(device_image, static_cast<float>(clock.toc()) * 1e-3f).launch(window_size)
+                   << device_image.copy_to(pixels);
             stream.synchronize();
-            glDrawBuffer(GL_BACK);
-            glDrawPixels(width, height, GL_RGBA, GL_UNSIGNED_BYTE, host_image.data());
-            ImGui::Begin("Test1");
-            ImGui::End();
-            frame++;
         });
-        another.with_frame([&] {
-            ImGui::Begin("Test2");
-            ImGui::End();
+        ImVec2 background_size{static_cast<float>(window_size.x), static_cast<float>(window_size.y)};
+        ImGui::GetBackgroundDrawList()->AddImage(reinterpret_cast<ImTextureID *>(texture.handle()), {}, background_size);
+        auto dt = framerate.tick();
+        auto fps = framerate.fps();
+        auto spp = framerate.count();
+        with_panel("Console", ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize, [&] {
+            ImGui::Text("Size: %ux%u", window_size.x, window_size.y);
+            ImGui::Text("Frame: %llu", spp);
+            ImGui::Text("FPS: %lf", fps);
         });
-    }
+    });
 }

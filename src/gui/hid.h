@@ -11,7 +11,6 @@
 namespace luisa::gui {
 
 enum Key : uint32_t {
-
     KEY_SPACE = 32u,
     KEY_APOSTROPHE = 39u, /* ' */
     KEY_COMMA = 44u,      /* , */
