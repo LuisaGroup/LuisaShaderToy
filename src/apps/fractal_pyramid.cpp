@@ -2,20 +2,15 @@
 // Created by Mike Smith on 2021/6/25.
 //
 
-#include <iostream>
-#include <opencv2/opencv.hpp>
-
 #include <dsl/syntax.h>
+#include <gui/window.h>
 #include <runtime/context.h>
 #include <runtime/device.h>
 #include <runtime/event.h>
 #include <runtime/stream.h>
-#include <tests/fake_device.h>
-
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <tests/stb_image_write.h>
 
 using namespace luisa;
+using namespace luisa::gui;
 using namespace luisa::compute;
 
 int main(int argc, char *argv[]) {
@@ -29,7 +24,7 @@ int main(int argc, char *argv[]) {
 #elif defined(LUISA_BACKEND_DX_ENABLED)
     auto device = context.create_device("dx");
 #else
-    auto device = FakeDevice::create(context);
+#error No backend available
 #endif
 
     Callable palette = [](Float d) noexcept {
@@ -92,34 +87,35 @@ int main(int argc, char *argv[]) {
 
     device.compile(clear, shader);
 
-    static constexpr auto width = 1024u;
-    static constexpr auto height = 1024u;
+    static constexpr auto width = 512u;
+    static constexpr auto height = 512u;
     static constexpr auto fps = 24.0f;
     static constexpr auto frame_time = 1.0f / fps;
     auto device_image = device.create_image<float>(PixelStorage::BYTE4, width, height);
-    cv::Mat host_image{cv::Size{width, height}, CV_8UC4, cv::Scalar::all(0)};
-
-    cv::VideoWriter video{"demo.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 24.0f, {width, height}};
-    if (!video.isOpened()) { LUISA_WARNING("Failed to open video stream"); }
+    std::vector<uint8_t> host_image(width * height * 4u, 0u);
 
     auto stream = device.create_stream();
     stream << clear(device_image).launch(width, height);
 
-    auto i = 0u;
-    auto time = 0.0f;
-    constexpr auto max_time = 60.0f;
-    cv::Mat frame;
-    while (time < max_time) {
-        Clock clock;
-        stream << shader(device_image, time).launch(width, height)
-               << device_image.copy_to(host_image.data);
-        stream.synchronize();
-        LUISA_INFO("Frame #{} ({}%): {} ms", i++, (time + frame_time) / max_time * 100.0f, clock.toc());
-        cv::cvtColor(host_image, frame, cv::COLOR_BGRA2BGR);
-        video.write(frame);
-        cv::imshow("Display", frame);
-        cv::waitKey(1);
-        time += frame_time;
+    Window window{"Fractal Pyramid", width, height};
+    Window another{"Another", width, height};
+
+    auto frame = 0u;
+
+    while (!window.should_close() || !another.should_close()) {
+        window.with_frame([&] {
+            stream << shader(device_image, static_cast<float>(frame) * frame_time).launch(width, height)
+                   << device_image.copy_to(host_image.data());
+            stream.synchronize();
+            glDrawBuffer(GL_BACK);
+            glDrawPixels(width, height, GL_RGBA, GL_UNSIGNED_BYTE, host_image.data());
+            ImGui::Begin("Test1");
+            ImGui::End();
+            frame++;
+        });
+        another.with_frame([&] {
+            ImGui::Begin("Test2");
+            ImGui::End();
+        });
     }
-    video.release();
 }
