@@ -24,8 +24,6 @@ void with_panel(const char *name, ImGuiWindowFlags flags, F &&f) {
 
 int main(int argc, char *argv[]) {
 
-    //    log_level_verbose();
-
     Context context{argv[0]};
 
 #if defined(LUISA_BACKEND_METAL_ENABLED)
@@ -96,8 +94,8 @@ int main(int argc, char *argv[]) {
 
     device.compile(clear, shader);
 
-    static constexpr auto width = 1280u;
-    static constexpr auto height = 720u;
+    static constexpr auto width = 512u;
+    static constexpr auto height = 512u;
     auto device_image = device.create_image<float>(PixelStorage::BYTE4, width, height);
 
     Window window{"Fractal Pyramid", width, height};
@@ -126,8 +124,10 @@ int main(int argc, char *argv[]) {
             stream << clear(device_image).launch(window_size);
             texture.resize(window_size);
         }
+        
+        auto time = clock.toc() * 1e-3;
         texture.with_pixels_uploading([&](void *pixels) noexcept {
-            stream << shader(device_image, static_cast<float>(clock.toc()) * 1e-3f).launch(window_size)
+            stream << shader(device_image, static_cast<float>(time)).launch(window_size)
                    << device_image.copy_to(pixels)
                    << event.signal();
         });
@@ -137,8 +137,11 @@ int main(int argc, char *argv[]) {
         auto spp = framerate.count();
         with_panel("Console", ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize, [&] {
             ImGui::Text("Frame: %llu", spp);
+            ImGui::Text("Time: %.2lfs", time);
             ImGui::Text("Size: %ux%u", window_size.x, window_size.y);
             ImGui::Text("FPS: %lf", fps);
         });
+
+        if (window.key_down(KEY_ESCAPE)) { window.notify_close(); }
     });
 }
