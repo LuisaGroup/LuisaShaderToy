@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
     Kernel2D shader = [&rm, &rotate](ImageFloat image, Float time) noexcept {
         Var xy = dispatch_id().xy();
         Var resolution = launch_size().xy().cast<float2>();
-        Var uv = (xy.cast<float2>() - resolution * 0.5f) / resolution.x;
+        Var uv = (xy.cast<float2>() - resolution * 0.5f) / ite(resolution.x < resolution.y, resolution.x, resolution.y);
         Var ro = make_float3(rotate(make_float2(0.0f, -50.0f), time), 0.0f).xzy();
         Var cf = normalize(-ro);
         Var cs = normalize(cross(cf, make_float3(0.0f, 1.0f, 0.0f)));
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
         Var uuv = ro + cf * 3.0f + uv.x * cs + uv.y * cu;
         Var rd = normalize(uuv - ro);
         Var col = rm(ro, rd, time);
-        Var color = col.xyz();
+        Var color = col.zyx();
         Var alpha = col.w;
         Var old = image.read(xy).xyz();
         Var accum = lerp(color, old, alpha);
@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
             ImGui::Text("Frame: %llu", spp);
             ImGui::Text("Time: %.2lfs", time);
             ImGui::Text("Size: %ux%u", window_size.x, window_size.y);
-            ImGui::Text("FPS: %lf", fps);
+            ImGui::Text("FPS: %.1lf", fps);
         });
 
         if (window.key_down(KEY_ESCAPE)) { window.notify_close(); }
