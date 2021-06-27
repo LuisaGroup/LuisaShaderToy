@@ -56,7 +56,8 @@ public:
         device.compile(_shader, _clear);
     }
 
-    void run(uint2 size = {512u, 512u}) noexcept;
+    void run(uint2 size) noexcept;
+    void run(uint w, uint h) noexcept { run({w, h}); }
 };
 
 }// namespace luisa::gui

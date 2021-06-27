@@ -71,5 +71,5 @@ int main(int argc, char *argv[]) {
       image.write(xy, make_float4(accum, 1.0f));
     };
 
-    gui::ShaderToy{device, "Fractal Pyramid", shader}.run();
+    gui::ShaderToy{device, "Fractal Pyramid", shader}.run(512u, 512u);
 }
