@@ -12,9 +12,9 @@ int main(int argc, char *argv[]) {
 
     Callable noise = [](Float3 p) noexcept {
         Var i = floor(p);
-        Var a = make_float4(dot(i, float3(1.f, 57.f, 21.f))) + float4(0.f, 57.f, 21.f, 78.f);
+        Var a = dot(i, float3(1.f, 57.f, 21.f)) + float4(0.f, 57.f, 21.f, 78.f);
         Var f = cos((p - i) * acos(-1.f)) * (-.5f) + .5f;
-        a = lerp(sin(cos(a) * a), sin(cos(float4(1.f) + a) * (float4(1.f) + a)), f.x);
+        a = lerp(sin(cos(a) * a), sin(cos(1.f + a) * (1.f + a)), f.x);
         Var axy = lerp(a.xz(), a.yw(), f.y);
         return lerp(axy.x, axy.y, f.z);
     };
