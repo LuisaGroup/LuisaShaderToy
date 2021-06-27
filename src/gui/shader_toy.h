@@ -31,7 +31,7 @@ using compute::Stream;
 class ShaderToy {
 
 public:
-    using Shader = Callable<float4(
+    using Shader = Callable<float3(
         float2 /* xy */,
         float2 /* resolution */,
         float /* time */,

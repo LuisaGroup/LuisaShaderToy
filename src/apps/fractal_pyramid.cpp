@@ -7,10 +7,11 @@
 using namespace luisa;
 using namespace luisa::compute;
 
+// Credit: https://www.shadertoy.com/view/tsXBzS
 int main(int argc, char *argv[]) {
 
     Callable palette = [](Float d) noexcept {
-        return lerp(make_float3(0.2f, 0.7f, 0.9f), make_float3(1.0f, 0.0f, 1.0f), d);
+        return lerp(float3(0.2f, 0.7f, 0.9f), float3(1.0f, 0.0f, 1.0f), d);
     };
 
     Callable rotate = [](Float2 p, Float a) noexcept {
@@ -52,7 +53,7 @@ int main(int argc, char *argv[]) {
         Var cu = normalize(cross(cf, cs));
         Var uuv = ro + cf * 3.0f + uv.x * cs + uv.y * cu;
         Var rd = normalize(uuv - ro);
-        return rm(ro, rd, time);
+        return rm(ro, rd, time).xyz();
     };
 
     gui::ShaderToy::run(argv[0], shader);

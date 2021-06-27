@@ -97,7 +97,9 @@ float2 Window::cursor() const noexcept {
     auto x = 0.0;
     auto y = 0.0;
     glfwGetCursorPos(_handle, &x, &y);
-    return {static_cast<float>(x), static_cast<float>(y)};
+    auto window_size = size();
+    return {std::clamp(static_cast<float>(x), 0.0f, static_cast<float>(window_size.x)),
+            std::clamp(static_cast<float>(y), 0.0f, static_cast<float>(window_size.y))};
 }
 
 void Window::_destroy() noexcept {

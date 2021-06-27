@@ -66,7 +66,7 @@ void ShaderToy::_run(uint2 size) noexcept {
     });
 }
 
-ShaderToy::ShaderToy(Device &device, std::string_view title, const Callable<float4(float2, float2, float, float2)> &shader) noexcept
+ShaderToy::ShaderToy(Device &device, std::string_view title, const Shader &shader) noexcept
     : _device{device},
       _stream{device.create_stream()},
       _event{device.create_event()},
@@ -75,18 +75,14 @@ ShaderToy::ShaderToy(Device &device, std::string_view title, const Callable<floa
           using namespace compute;
           Var xy = dispatch_id().xy();
           Var resolution = launch_size().xy();
-          Var col = shader(xy.cast<float2>(), resolution.cast<float2>(), time, cursor);
-          Var color = col.xyz();
-          Var alpha = col.w;
-          Var old = image.read(xy).xyz();
-          Var accum = lerp(color, old, alpha);
-          image.write(xy, make_float4(accum, 1.0f));
+          Var col = shader(make_uint2(xy.x, resolution.y - 1u - xy.y).cast<float2>(), resolution.cast<float2>(), time, cursor);
+          image.write(xy, make_float4(col, 1.0f));
       }},
       _clear{[](ImageFloat image) noexcept {
           using namespace compute;
           Var coord = dispatch_id().xy();
           Var rg = make_float2(coord) / make_float2(launch_size().xy());
-          image.write(coord, make_float4(make_float2(0.3f, 0.4f), 0.5f, 1.0f));
+          image.write(coord, float4(0.0f));
       }} {
     device.compile(_shader, _clear);
 }
