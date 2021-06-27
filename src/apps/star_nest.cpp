@@ -34,8 +34,8 @@ int main(int argc, char *argv[]) {
         //mouse rotation
         Var a1 = .5f + iMouse.x / iResolution.x * 2.f;
         Var a2 = .8f + iMouse.y / iResolution.y * 2.f;
-        Float2x2 rot1{cos(a1), -sin(a1), sin(a1), cos(a1)};
-        Float2x2 rot2{cos(a2), -sin(a2), sin(a2), cos(a2)};
+        Var rot1 = make_float2x2(cos(a1), -sin(a1), sin(a1), cos(a1));
+        Var rot2 = make_float2x2(cos(a2), -sin(a2), sin(a2), cos(a2));
         dir = make_float3(rot1 * dir.xz(), dir.y).xzy();
         dir = make_float3(rot2 * dir.xy(), dir.z);
         Var from = make_float3(1.0f, 0.5f, 0.5f);

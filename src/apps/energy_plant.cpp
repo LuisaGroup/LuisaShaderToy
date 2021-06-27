@@ -13,8 +13,7 @@ int main(int argc, char *argv[]) {
     Callable rot = [](Float a) noexcept {
         Var s = sin(a);
         Var c = cos(a);
-        Float2x2 m{c, -s, s, c};
-        return m;
+        return make_float2x2(c, -s, s, c);
     };
 
     Callable lpNorm = [](Float3 p, Float n) noexcept {

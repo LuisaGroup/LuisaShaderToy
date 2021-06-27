@@ -13,8 +13,7 @@ int main(int argc, char *argv[]) {
     Callable rot = [](Float a) noexcept {
         Var c = cos(a);
         Var s = sin(a);
-        Float2x2 m{c, -s, s, c};
-        return m;
+        return make_float2x2(c, -s, s, c);
     };
 
     static constexpr auto m3 = transpose(float3x3(
