@@ -47,8 +47,8 @@ private:
 
 public:
     ShaderToy(Device &device, std::string_view title,
-              const Callable<float4(float2 /* resolution */,
-                                    float2 /* xy */,
+              const Callable<float4(float2 /* xy */,
+                                    float2 /* resolution */,
                                     float /* time */,
                                     float2 /* cursor */)> &shader) noexcept;
     void run(uint2 size) noexcept;

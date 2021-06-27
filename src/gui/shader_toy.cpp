@@ -75,7 +75,7 @@ ShaderToy::ShaderToy(Device &device, std::string_view title, const Callable<floa
           using namespace compute;
           Var xy = dispatch_id().xy();
           Var resolution = launch_size().xy();
-          Var col = shader(resolution.cast<float2>(), xy.cast<float2>(), time, cursor);
+          Var col = shader(xy.cast<float2>(), resolution.cast<float2>(), time, cursor);
           Var color = col.xyz();
           Var alpha = col.w;
           Var old = image.read(xy).xyz();

@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
         return make_float4(col, 1.0f / (d * 100.0f));
     };
 
-    gui::run_toy(argv[0], 512u, 512u, [&](Float2 resolution, Float2 xy, Float time, Float2) noexcept {
+    Callable shader = [&](Float2 xy, Float2 resolution, Float time, Float2) noexcept {
         Var uv = (xy - resolution * 0.5f) / ite(resolution.x < resolution.y, resolution.x, resolution.y);
         Var ro = make_float3(rotate(make_float2(0.0f, -50.0f), time), 0.0f).xzy();
         Var cf = normalize(-ro);
@@ -53,5 +53,7 @@ int main(int argc, char *argv[]) {
         Var uuv = ro + cf * 3.0f + uv.x * cs + uv.y * cu;
         Var rd = normalize(uuv - ro);
         return rm(ro, rd, time);
-    });
+    };
+
+    gui::run_toy(argv[0], 512u, 512u, shader);
 }
