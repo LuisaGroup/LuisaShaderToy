@@ -15,10 +15,15 @@
 
 namespace luisa::gui {
 
+using compute::Callable;
 using compute::Context;
 using compute::Device;
 using compute::Event;
+using compute::Float;
+using compute::Float2;
+using compute::Float4;
 using compute::Image;
+using compute::ImageFloat;
 using compute::ImageVar;
 using compute::Kernel2D;
 using compute::Stream;
@@ -34,29 +39,18 @@ public:
 
 private:
     Device &_device;
-    Shader _shader;
     Stream _stream;
     Event _event;
     std::string_view _title;
+    Kernel2D<void(Image<float>, float, float2)> _shader;
     Kernel2D<void(Image<float>)> _clear;
 
 public:
-    template<typename Def>
-    ShaderToy(Device &device, std::string_view title, Def &&shader) noexcept
-        : _device{device},
-          _shader{std::forward<Def>(shader)},
-          _stream{device.create_stream()},
-          _event{device.create_event()},
-          _title{title},
-          _clear{[](ImageVar<float> image) noexcept {
-              using namespace compute;
-              Var coord = dispatch_id().xy();
-              Var rg = make_float2(coord) / make_float2(launch_size().xy());
-              image.write(coord, make_float4(make_float2(0.3f, 0.4f), 0.5f, 1.0f));
-          }} {
-        device.compile(_shader, _clear);
-    }
-
+    ShaderToy(Device &device, std::string_view title,
+              const Callable<float4(float2 /* resolution */,
+                                    float2 /* xy */,
+                                    float /* time */,
+                                    float2 /* cursor */)> &shader) noexcept;
     void run(uint2 size) noexcept;
     void run(uint w, uint h) noexcept { run({w, h}); }
 };
