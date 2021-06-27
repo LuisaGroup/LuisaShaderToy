@@ -14,7 +14,8 @@
 
 namespace luisa::gui {
 
-Window::Window(std::string_view title, uint32_t width, uint32_t height) noexcept {
+Window::Window(std::string_view title, uint32_t width, uint32_t height) noexcept
+    : _time_start{glfwGetTime()} {
 
     static std::once_flag once_flag;
     std::call_once(once_flag, [] {
@@ -117,6 +118,7 @@ void Window::_destroy() noexcept {
 Window &Window::operator=(Window &&rhs) noexcept {
     if (&rhs != this) {
         _destroy();
+        _time_start = rhs._time_start;
         _handle = rhs._handle;
         _context = rhs._context;
         rhs._handle = nullptr;
@@ -126,7 +128,8 @@ Window &Window::operator=(Window &&rhs) noexcept {
 }
 
 Window::Window(Window &&another) noexcept
-    : _handle{another._handle},
+    : _time_start{another._time_start},
+      _handle{another._handle},
       _context{another._context} {
     another._handle = nullptr;
     another._context = nullptr;
@@ -144,6 +147,10 @@ uint2 Window::framebuffer_size() const noexcept {
     auto h = 0;
     glfwGetFramebufferSize(_handle, &w, &h);
     return {w, h};
+}
+
+float Window::time() const noexcept {
+    return static_cast<float>(glfwGetTime() - _time_start);
 }
 
 }// namespace luisa::gui

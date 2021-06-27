@@ -22,6 +22,7 @@ public:
     using Handle = struct GLFWwindow *;
 
 private:
+    double _time_start;
     Handle _handle{nullptr};
     ImGuiContext *_context{nullptr};
 
@@ -32,6 +33,7 @@ private:
 
 public:
     Window(std::string_view title, uint32_t width, uint32_t height) noexcept;
+    Window(std::string_view title, uint2 size) noexcept : Window{title, size.x, size.y} {}
     ~Window() noexcept;
 
     Window(Window &&another) noexcept;
@@ -66,6 +68,7 @@ public:
     [[nodiscard]] float2 cursor() const noexcept;
     [[nodiscard]] uint2 size() const noexcept;
     [[nodiscard]] uint2 framebuffer_size() const noexcept;
+    [[nodiscard]] float time() const noexcept;
 };
 
 }// namespace luisa::gui
