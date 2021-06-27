@@ -166,5 +166,5 @@ int main(int argc, char *argv[]) {
         return pow(col, float3(1.5f));
     };
 
-    gui::ShaderToy::run(argv[0], mainImage);
+    gui::ShaderToy::run(argv[0], mainImage, 512u);
 }

@@ -75,7 +75,7 @@ ShaderToy::ShaderToy(Device &device, std::string_view title, const Shader &shade
           using namespace compute;
           Var xy = dispatch_id().xy();
           Var resolution = launch_size().xy();
-          Var col = shader(make_uint2(xy.x, resolution.y - 1u - xy.y).cast<float2>(), resolution.cast<float2>(), time, cursor);
+          Var col = shader(make_uint2(xy.x, resolution.y - 1u - xy.y).cast<float2>() + 0.5f, resolution.cast<float2>(), time, cursor);
           image.write(xy, make_float4(col, 1.0f));
       }},
       _clear{[](ImageFloat image) noexcept {
