@@ -16,7 +16,8 @@ int main(int argc, char *argv[]) {
     Callable rotate = [](Float2 p, Float a) noexcept {
         Var c = cos(a);
         Var s = sin(a);
-        return make_float2(dot(p, make_float2(c, s)), dot(p, make_float2(-s, c)));
+        Float2x2 m{c, -s, s, c};
+        return m * p;
     };
 
     Callable map = [&rotate](Float3 p, Float time) noexcept {
