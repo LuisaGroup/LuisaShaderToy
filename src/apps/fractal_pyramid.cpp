@@ -55,5 +55,5 @@ int main(int argc, char *argv[]) {
         return rm(ro, rd, time);
     };
 
-    gui::run_toy(argv[0], 512u, 512u, shader);
+    gui::ShaderToy::run(argv[0], shader);
 }

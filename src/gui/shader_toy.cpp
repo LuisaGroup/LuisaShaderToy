@@ -16,7 +16,7 @@ static void with_panel(const char *name, F &&f) {
     ImGui::End();
 }
 
-void ShaderToy::run(uint2 size) noexcept {
+void ShaderToy::_run(uint2 size) noexcept {
 
     Window window{_title, size};
     GLTexture texture{PixelFormat::RGBA8UNorm, size};
@@ -89,6 +89,27 @@ ShaderToy::ShaderToy(Device &device, std::string_view title, const Callable<floa
           image.write(coord, make_float4(make_float2(0.3f, 0.4f), 0.5f, 1.0f));
       }} {
     device.compile(_shader, _clear);
+}
+
+void ShaderToy::run(const std::filesystem::path &program, const ShaderToy::Shader &shader, uint2 size) noexcept {
+    Context context{program};
+
+#if defined(LUISA_BACKEND_METAL_ENABLED)
+    auto device = context.create_device("metal");
+#elif defined(LUISA_BACKEND_DX_ENABLED)
+    auto device = context.create_device("dx");
+#else
+#error No backend available
+#endif
+    
+    auto title = program.filename().replace_extension("").string();
+    for (auto &c : title) { c = c == '_' ? ' ' : c; }
+    auto is_first = true;
+    for (auto &c : title) {
+        if (is_first) { c = static_cast<char>(std::toupper(c)); }
+        is_first = c == ' ';
+    }
+    ShaderToy{device, title, shader}._run(size);
 }
 
 }// namespace luisa::gui

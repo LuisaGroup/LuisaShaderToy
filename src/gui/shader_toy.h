@@ -31,11 +31,11 @@ using compute::Stream;
 class ShaderToy {
 
 public:
-    using Shader = Kernel2D<void(
-        Image<float>,// image
-        float,       // time
-        float2       // mouse
-        )>;
+    using Shader = Callable<float4(
+        float2 /* xy */,
+        float2 /* resolution */,
+        float /* time */,
+        float2 /* cursor */)>;
 
 private:
     Device &_device;
@@ -45,36 +45,13 @@ private:
     Kernel2D<void(Image<float>, float, float2)> _shader;
     Kernel2D<void(Image<float>)> _clear;
 
-public:
+private:
     ShaderToy(Device &device, std::string_view title,
-              const Callable<float4(float2 /* xy */,
-                                    float2 /* resolution */,
-                                    float /* time */,
-                                    float2 /* cursor */)> &shader) noexcept;
-    void run(uint2 size) noexcept;
-    void run(uint w, uint h) noexcept { run({w, h}); }
+              const Shader &shader) noexcept;
+    void _run(uint2 size) noexcept;
+
+public:
+    static void run(const std::filesystem::path &program, const ShaderToy::Shader &shader, uint2 size = {1280u, 720u}) noexcept;
 };
-
-template<typename Shader>
-inline void run_toy(const std::filesystem::path &program, uint width, uint height, Shader &&shader) noexcept {
-    Context context{program};
-
-#if defined(LUISA_BACKEND_METAL_ENABLED)
-    auto device = context.create_device("metal");
-#elif defined(LUISA_BACKEND_DX_ENABLED)
-    auto device = context.create_device("dx");
-#else
-#error No backend available
-#endif
-
-    auto title = program.filename().replace_extension("").string();
-    for (auto &c : title) { c = c == '_' ? ' ' : c; }
-    auto is_first = true;
-    for (auto &c : title) {
-        if (is_first) { c = static_cast<char>(std::toupper(c)); }
-        is_first = c == ' ';
-    }
-    ShaderToy{device, title, std::forward<Shader>(shader)}.run(width, height);
-}
 
 }// namespace luisa::gui
