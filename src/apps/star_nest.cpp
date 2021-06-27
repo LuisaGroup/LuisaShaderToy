@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     static constexpr auto darkmatter = 0.300f;
     static constexpr auto distfading = 0.730f;
     static constexpr auto saturation = 0.850f;
-    
+
     Callable mod = [](Float3 x, Float3 y) noexcept { return x - y * floor(x / y); };
 
     Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse) noexcept {
@@ -59,10 +59,10 @@ int main(int argc, char *argv[]) {
             }
             Var dm = max(0.f, darkmatter - a * a * .001f);//dark matter
             a *= a * a;                                   // add contrast
-            if (r > 6) fade *= 1.f - dm;                   // dark matter, don't render near
+            if (r > 6) fade *= 1.f - dm;                  // dark matter, don't render near
             v += fade;
             v += make_float3(s, s * s, s * s * s * s) * a * brightness * fade;// coloring based on distance
-            fade *= distfading;                                        // distance fading
+            fade *= distfading;                                               // distance fading
             s += stepsize;
         }
         v = lerp(make_float3(length(v)), v, saturation);//color adjust

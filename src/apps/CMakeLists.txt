@@ -1,8 +1,9 @@
-add_executable(fractal_pyramid fractal_pyramid.cpp)
-target_link_libraries(fractal_pyramid PRIVATE luisa::shader-toy)
+function(luisa_shader_toy_add_executable name)
+    add_executable(${name} ${name}.cpp)
+    target_link_libraries(${name} PRIVATE luisa::shader-toy)
+endfunction()
 
-add_executable(energy_plant energy_plant.cpp)
-target_link_libraries(energy_plant PRIVATE luisa::shader-toy)
-
-add_executable(star_nest star_nest.cpp)
-target_link_libraries(star_nest PRIVATE luisa::shader-toy)
+luisa_shader_toy_add_executable(fractal_pyramid)
+luisa_shader_toy_add_executable(energy_plant)
+luisa_shader_toy_add_executable(star_nest)
+luisa_shader_toy_add_executable(protean_clouds)
