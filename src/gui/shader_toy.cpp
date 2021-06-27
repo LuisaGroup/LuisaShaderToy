@@ -24,11 +24,12 @@ void ShaderToy::_run(uint2 size) noexcept {
 
     texture.with_pixels_uploading([&](void *pixels) noexcept {
         _stream << _clear(device_image).launch(size)
-                << _shader(device_image, window.time(), window.cursor()).launch(size)
                 << device_image.copy_to(pixels)
                 << _event.signal();
     });
-
+    
+    auto cursor = float4(0.0f);
+    auto dragging = false;
     Framerate framerate{0.8};
     window.run([&] {
         _event.synchronize();
@@ -42,9 +43,21 @@ void ShaderToy::_run(uint2 size) noexcept {
             _stream << _clear(device_image).launch(window_size);
             texture.resize(window_size);
         }
+        
+        if (window.mouse_down(MOUSE_LEFT)) {
+            auto curr = window.cursor();
+            if (dragging) {
+                cursor = float4(curr, cursor.zw());
+            } else {
+                cursor = float4(curr, curr * float2(1.0f, -1.0f));
+                dragging = true;
+            }
+        } else if (window.mouse_up(MOUSE_LEFT)) {
+            cursor = float4(cursor.xy(), -abs(cursor.zw()));
+            dragging = false;
+        }
 
         auto time = window.time();
-        auto cursor = window.cursor();
         texture.with_pixels_uploading([&](void *pixels) noexcept {
             _stream << _shader(device_image, time, cursor).launch(window_size)
                     << device_image.copy_to(pixels)
@@ -59,7 +72,7 @@ void ShaderToy::_run(uint2 size) noexcept {
             ImGui::Text("Time:  %.2lfs", time);
             ImGui::Text("FPS:   %.1lf", fps);
             ImGui::Text("Size:  %ux%u", window_size.x, window_size.y);
-            ImGui::Text("Mouse: (%.1f, %.1f)", cursor.x, cursor.y);
+            ImGui::Text("Mouse: (%.1f, %.1f, %.1f, %.1f)", cursor.x, cursor.y, cursor.z, cursor.w);
         });
 
         if (window.key_down(KEY_ESCAPE)) { window.notify_close(); }
@@ -71,7 +84,7 @@ ShaderToy::ShaderToy(Device &device, std::string_view title, const Shader &shade
       _stream{device.create_stream()},
       _event{device.create_event()},
       _title{title},
-      _shader{[&shader](ImageFloat image, Float time, Float2 cursor) noexcept {
+      _shader{[&shader](ImageFloat image, Float time, Float4 cursor) noexcept {
           using namespace compute;
           Var xy = dispatch_id().xy();
           Var resolution = launch_size().xy();

@@ -35,14 +35,14 @@ public:
         float2 /* xy */,
         float2 /* resolution */,
         float /* time */,
-        float2 /* cursor */)>;
+        float4 /* cursor */)>;
 
 private:
     Device &_device;
     Stream _stream;
     Event _event;
     std::string_view _title;
-    Kernel2D<void(Image<float>, float, float2)> _shader;
+    Kernel2D<void(Image<float>, float, float4)> _shader;
     Kernel2D<void(Image<float>)> _clear;
 
 private:

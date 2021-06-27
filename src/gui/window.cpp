@@ -93,6 +93,14 @@ bool Window::mouse_down(Mouse button) const noexcept {
     return glfwGetMouseButton(_handle, static_cast<int>(button)) == GLFW_PRESS;
 }
 
+bool Window::key_up(Key key) const noexcept {
+    return glfwGetKey(_handle, static_cast<int>(key)) == GLFW_RELEASE;
+}
+
+bool Window::mouse_up(Mouse button) const noexcept {
+    return glfwGetMouseButton(_handle, static_cast<int>(button)) == GLFW_RELEASE;
+}
+
 float2 Window::cursor() const noexcept {
     auto x = 0.0;
     auto y = 0.0;

@@ -64,7 +64,9 @@ public:
     }
 
     [[nodiscard]] bool key_down(Key key) const noexcept;
+    [[nodiscard]] bool key_up(Key key) const noexcept;
     [[nodiscard]] bool mouse_down(Mouse button) const noexcept;
+    [[nodiscard]] bool mouse_up(Mouse button) const noexcept;
     [[nodiscard]] float2 cursor() const noexcept;
     [[nodiscard]] uint2 size() const noexcept;
     [[nodiscard]] uint2 framebuffer_size() const noexcept;

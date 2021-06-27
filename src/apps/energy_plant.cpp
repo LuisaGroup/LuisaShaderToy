@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
         return I - 2.0f * dot(N, I) * N;
     };
 
-    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float time, Float2 cursor) noexcept {
+    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float time, Float4 cursor) noexcept {
         Var uv = (fragCoord * 2.0f - iResolution.xy()) / iResolution.y;
         auto ro = float3(2.5, 3.5, 8);
         auto ta = float3(-1, 0, 0);
