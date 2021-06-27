@@ -108,7 +108,7 @@ void ShaderToy::run(const std::filesystem::path &program, const ShaderToy::Shade
 #elif defined(LUISA_BACKEND_DX_ENABLED)
     auto device = context.create_device("dx");
 #else
-#error No backend available
+    auto &&device = *static_cast<Device *>(nullptr);
 #endif
     
     auto title = program.filename().replace_extension("").string();
