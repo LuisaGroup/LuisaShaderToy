@@ -15,6 +15,7 @@
 
 namespace luisa::gui {
 
+using compute::Context;
 using compute::Device;
 using compute::Event;
 using compute::Image;
@@ -59,5 +60,27 @@ public:
     void run(uint2 size) noexcept;
     void run(uint w, uint h) noexcept { run({w, h}); }
 };
+
+template<typename Shader>
+inline void run_toy(const std::filesystem::path &program, uint width, uint height, Shader &&shader) noexcept {
+    Context context{program};
+
+#if defined(LUISA_BACKEND_METAL_ENABLED)
+    auto device = context.create_device("metal");
+#elif defined(LUISA_BACKEND_DX_ENABLED)
+    auto device = context.create_device("dx");
+#else
+#error No backend available
+#endif
+
+    auto title = program.filename().replace_extension("").string();
+    for (auto &c : title) { c = c == '_' ? ' ' : c; }
+    auto is_first = true;
+    for (auto &c : title) {
+        if (is_first) { c = static_cast<char>(std::toupper(c)); }
+        is_first = c == ' ';
+    }
+    ShaderToy{device, title, std::forward<Shader>(shader)}.run(width, height);
+}
 
 }// namespace luisa::gui

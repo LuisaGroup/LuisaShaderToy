@@ -9,16 +9,6 @@ using namespace luisa::compute;
 
 int main(int argc, char *argv[]) {
 
-    Context context{argv[0]};
-
-#if defined(LUISA_BACKEND_METAL_ENABLED)
-    auto device = context.create_device("metal");
-#elif defined(LUISA_BACKEND_DX_ENABLED)
-    auto device = context.create_device("dx");
-#else
-#error No backend available
-#endif
-
     Callable palette = [](Float d) noexcept {
         return lerp(make_float3(0.2f, 0.7f, 0.9f), make_float3(1.0f, 0.0f, 1.0f), d);
     };
@@ -52,24 +42,22 @@ int main(int argc, char *argv[]) {
         }
         return make_float4(col, 1.0f / (d * 100.0f));
     };
-    
-    auto shader = [&](ImageFloat image, Float time, Float2) noexcept {
-      Var xy = dispatch_id().xy();
-      Var resolution = launch_size().xy().cast<float2>();
-      Var uv = (xy.cast<float2>() - resolution * 0.5f) / ite(resolution.x < resolution.y, resolution.x, resolution.y);
-      Var ro = make_float3(rotate(make_float2(0.0f, -50.0f), time), 0.0f).xzy();
-      Var cf = normalize(-ro);
-      Var cs = normalize(cross(cf, make_float3(0.0f, 1.0f, 0.0f)));
-      Var cu = normalize(cross(cf, cs));
-      Var uuv = ro + cf * 3.0f + uv.x * cs + uv.y * cu;
-      Var rd = normalize(uuv - ro);
-      Var col = rm(ro, rd, time);
-      Var color = col.zyx();
-      Var alpha = col.w;
-      Var old = image.read(xy).xyz();
-      Var accum = lerp(color, old, alpha);
-      image.write(xy, make_float4(accum, 1.0f));
-    };
 
-    gui::ShaderToy{device, "Fractal Pyramid", shader}.run(512u, 512u);
+    gui::run_toy(argv[0], 512u, 512u, [&](ImageFloat image, Float time, Float2) noexcept {
+        Var xy = dispatch_id().xy();
+        Var resolution = launch_size().xy().cast<float2>();
+        Var uv = (xy.cast<float2>() - resolution * 0.5f) / ite(resolution.x < resolution.y, resolution.x, resolution.y);
+        Var ro = make_float3(rotate(make_float2(0.0f, -50.0f), time), 0.0f).xzy();
+        Var cf = normalize(-ro);
+        Var cs = normalize(cross(cf, make_float3(0.0f, 1.0f, 0.0f)));
+        Var cu = normalize(cross(cf, cs));
+        Var uuv = ro + cf * 3.0f + uv.x * cs + uv.y * cu;
+        Var rd = normalize(uuv - ro);
+        Var col = rm(ro, rd, time);
+        Var color = col.zyx();
+        Var alpha = col.w;
+        Var old = image.read(xy).xyz();
+        Var accum = lerp(color, old, alpha);
+        image.write(xy, make_float4(accum, 1.0f));
+    });
 }

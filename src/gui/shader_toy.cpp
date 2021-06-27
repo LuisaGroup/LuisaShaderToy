@@ -56,9 +56,10 @@ void ShaderToy::run(uint2 size) noexcept {
         auto spp = framerate.count();
         with_panel("Console", [&] {
             ImGui::Text("Frame: %llu", spp);
-            ImGui::Text("Time: %.2lfs", time);
-            ImGui::Text("Size: %ux%u", window_size.x, window_size.y);
-            ImGui::Text("FPS: %.1lf", fps);
+            ImGui::Text("Time:  %.2lfs", time);
+            ImGui::Text("FPS:   %.1lf", fps);
+            ImGui::Text("Size:  %ux%u", window_size.x, window_size.y);
+            ImGui::Text("Mouse: (%.1f, %.1f)", cursor.x, cursor.y);
         });
 
         if (window.key_down(KEY_ESCAPE)) { window.notify_close(); }
