@@ -5,7 +5,6 @@
 #include <gui/shader_toy.h>
 
 using namespace luisa;
-using namespace luisa::gui;
 using namespace luisa::compute;
 
 int main(int argc, char *argv[]) {
@@ -53,29 +52,24 @@ int main(int argc, char *argv[]) {
         }
         return make_float4(col, 1.0f / (d * 100.0f));
     };
-
-    Kernel2D clear = [](ImageVar<float> image) noexcept {
-        Var coord = dispatch_id().xy();
-        Var rg = make_float2(coord) / make_float2(launch_size().xy());
-        image.write(coord, make_float4(make_float2(0.3f, 0.4f), 0.5f, 1.0f));
+    
+    auto shader = [&](ImageFloat image, Float time, Float2) noexcept {
+      Var xy = dispatch_id().xy();
+      Var resolution = launch_size().xy().cast<float2>();
+      Var uv = (xy.cast<float2>() - resolution * 0.5f) / ite(resolution.x < resolution.y, resolution.x, resolution.y);
+      Var ro = make_float3(rotate(make_float2(0.0f, -50.0f), time), 0.0f).xzy();
+      Var cf = normalize(-ro);
+      Var cs = normalize(cross(cf, make_float3(0.0f, 1.0f, 0.0f)));
+      Var cu = normalize(cross(cf, cs));
+      Var uuv = ro + cf * 3.0f + uv.x * cs + uv.y * cu;
+      Var rd = normalize(uuv - ro);
+      Var col = rm(ro, rd, time);
+      Var color = col.zyx();
+      Var alpha = col.w;
+      Var old = image.read(xy).xyz();
+      Var accum = lerp(color, old, alpha);
+      image.write(xy, make_float4(accum, 1.0f));
     };
 
-    ShaderToy toy{device, "Fractal Pyramid", [&](ImageFloat image, Float time, Float2) noexcept {
-                      Var xy = dispatch_id().xy();
-                      Var resolution = launch_size().xy().cast<float2>();
-                      Var uv = (xy.cast<float2>() - resolution * 0.5f) / ite(resolution.x < resolution.y, resolution.x, resolution.y);
-                      Var ro = make_float3(rotate(make_float2(0.0f, -50.0f), time), 0.0f).xzy();
-                      Var cf = normalize(-ro);
-                      Var cs = normalize(cross(cf, make_float3(0.0f, 1.0f, 0.0f)));
-                      Var cu = normalize(cross(cf, cs));
-                      Var uuv = ro + cf * 3.0f + uv.x * cs + uv.y * cu;
-                      Var rd = normalize(uuv - ro);
-                      Var col = rm(ro, rd, time);
-                      Var color = col.zyx();
-                      Var alpha = col.w;
-                      Var old = image.read(xy).xyz();
-                      Var accum = lerp(color, old, alpha);
-                      image.write(xy, make_float4(accum, 1.0f));
-                  }};
-    toy.run();
+    gui::ShaderToy{device, "Fractal Pyramid", shader}.run();
 }
