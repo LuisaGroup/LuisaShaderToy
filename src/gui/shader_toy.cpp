@@ -46,6 +46,7 @@ void ShaderToy::_run(uint2 size) noexcept {
         
         if (window.mouse_down(MOUSE_LEFT)) {
             auto curr = window.cursor();
+            curr = float2(curr.x, static_cast<float>(window_size.y) - curr.y);
             if (dragging) {
                 cursor = float4(curr, cursor.zw());
             } else {
