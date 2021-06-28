@@ -597,3 +597,10 @@ flycheck_*.el
 /network-security.data
 
 
+build/src/compute/src/ext/spdlog/spdlog_pch.h
+build/src/ext/glfw/src/glfw3.pc
+build/src/ext/glfw/src/glfw3Config.cmake
+build/src/ext/glfw/src/glfw3ConfigVersion.cmake
+build/src/ext/glfw/src/glfw_config.h
+*.json
+*.a
