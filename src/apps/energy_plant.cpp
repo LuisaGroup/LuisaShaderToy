@@ -58,8 +58,6 @@ int main(int argc, char *argv[]) {
                    frameBox(p, float3(0.5f), 0.01f));
     };
 
-    Callable mod = [](Float x, Float y) noexcept { return x - y * floor(x / y); };
-
     Callable map = [&](Float3 p, Float g, Float time) noexcept {
         Var de = 1e9f;
         p.z -= time * 1.5f;

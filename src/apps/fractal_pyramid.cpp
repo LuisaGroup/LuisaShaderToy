@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
     };
 
     Callable shader = [&](Float2 xy, Float2 resolution, Float time, Float4) noexcept {
-        Var uv = (xy - resolution * 0.5f) / ite(resolution.x < resolution.y, resolution.x, resolution.y);
+        Var uv = (xy - resolution * 0.5f) / min(resolution.x, resolution.y);
         Var ro = make_float3(rotate(make_float2(0.0f, -50.0f), time), 0.0f).xzy();
         Var cf = normalize(-ro);
         Var cs = normalize(cross(cf, make_float3(0.0f, 1.0f, 0.0f)));
