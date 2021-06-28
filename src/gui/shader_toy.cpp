@@ -73,7 +73,7 @@ void ShaderToy::_run(uint2 size) noexcept {
         auto fps = framerate.fps();
         auto spp = framerate.count();
         with_panel("Console", &show_console, [&] {
-            ImGui::Text("Frame: %llu", spp);
+            ImGui::Text("Frame: %llu", static_cast<uint64_t>(spp));
             ImGui::Text("Time:  %.2lfs", time);
             ImGui::Text("FPS:   %.1lf", fps);
             ImGui::Text("Size:  %ux%u", window_size.x, window_size.y);
