@@ -95,9 +95,9 @@ int main(int argc, char *argv[]) {
         return multiple(normalize(e.xyy() * m1 + e.yyx() * m2 + e.yxy() * m3 + e.xxx() * m4), g4);
     };
 
-    Callable march = [&](Float3 ro, Float3 rd, Float near, Float far, Float g, Float time) noexcept {
-        Var t = near;
-        Var ret = far;
+    Callable march = [&](Float3 ro, Float3 rd, Float t_near, Float t_far, Float g, Float time) noexcept {
+        Var t = t_near;
+        Var ret = t_far;
         for (auto i : range(100)) {
             auto [d, new_g] = map(ro + rd * t, g, time);
             g = new_g;
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
                 ret = t;
                 break_();
             });
-            if_(t >= far, [&] { break_(); });
+            if_(t >= t_far, [&] { break_(); });
         }
         return multiple(ret, g);
     };
