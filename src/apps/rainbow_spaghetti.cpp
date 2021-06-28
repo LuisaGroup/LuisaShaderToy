@@ -1,6 +1,6 @@
 //
 // Created by Yawanari.fst on 2021/6/28.
-//
+// Credit: https://www.shadertoy.com/view/lsjGRV
 
 #include <gui/shader_toy.h>
 
