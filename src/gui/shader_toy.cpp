@@ -10,10 +10,12 @@ namespace luisa::gui {
 using namespace compute;
 
 template<typename F>
-static void with_panel(const char *name, F &&f) {
-    ImGui::Begin(name, nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
-    f();
-    ImGui::End();
+static void with_panel(const char *name, bool *show, F &&f) {
+    if (*show) {
+        ImGui::Begin(name, show, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
+        f();
+        ImGui::End();
+    }
 }
 
 void ShaderToy::_run(uint2 size) noexcept {
@@ -27,7 +29,9 @@ void ShaderToy::_run(uint2 size) noexcept {
                 << device_image.copy_to(pixels)
                 << _event.signal();
     });
-    
+
+    auto prev_key_up = false;
+    auto show_console = true;
     auto cursor = float4(0.0f);
     auto dragging = false;
     Framerate framerate{0.8};
@@ -43,7 +47,7 @@ void ShaderToy::_run(uint2 size) noexcept {
             _stream << _clear(device_image).launch(window_size);
             texture.resize(window_size);
         }
-        
+
         if (window.mouse_down(MOUSE_LEFT)) {
             auto curr = window.cursor();
             curr = float2(curr.x, static_cast<float>(window_size.y) - curr.y);
@@ -68,7 +72,7 @@ void ShaderToy::_run(uint2 size) noexcept {
         framerate.tick();
         auto fps = framerate.fps();
         auto spp = framerate.count();
-        with_panel("Console", [&] {
+        with_panel("Console", &show_console, [&] {
             ImGui::Text("Frame: %llu", spp);
             ImGui::Text("Time:  %.2lfs", time);
             ImGui::Text("FPS:   %.1lf", fps);
@@ -77,6 +81,8 @@ void ShaderToy::_run(uint2 size) noexcept {
         });
 
         if (window.key_down(KEY_ESCAPE)) { window.notify_close(); }
+        if (prev_key_up && (window.key_down(KEY_LEFT_CONTROL) || window.key_down(KEY_RIGHT_CONTROL))) { show_console = !show_console; }
+        prev_key_up = window.key_up(KEY_LEFT_CONTROL) && window.key_up(KEY_RIGHT_CONTROL);
     });
 }
 
@@ -111,7 +117,7 @@ void ShaderToy::run(const std::filesystem::path &program, const ShaderToy::Shade
 #else
     auto &&device = *static_cast<Device *>(nullptr);
 #endif
-    
+
     auto title = program.filename().replace_extension("").string();
     for (auto &c : title) { c = c == '_' ? ' ' : c; }
     auto is_first = true;
