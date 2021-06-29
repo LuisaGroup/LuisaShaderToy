@@ -42,7 +42,7 @@ void ShaderToy::_run(uint2 size) noexcept {
         ImGui::GetBackgroundDrawList()->AddImage(reinterpret_cast<ImTextureID *>(texture.handle()), {}, background_size);
 
         auto window_size = window.size();
-        if (render_size.x != window_size.x || render_size.y != window_size.y) {
+        if (!all(render_size == window_size.x)) {
             device_image = _device.create_image<float>(PixelStorage::BYTE4, window_size);
             _stream << _clear(device_image).launch(window_size);
             texture.resize(window_size);
