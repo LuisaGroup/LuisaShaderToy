@@ -97,5 +97,5 @@ int main(int argc, char *argv[]) {
         return pow(color, float3(0.454545f));
     };
 
-    gui::ShaderToy::run(argv[0], mainImage, 512u);
+    gui::ShaderToy::run(argv[0], mainImage, {900u, 600u});
 }
