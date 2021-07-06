@@ -25,7 +25,7 @@ void ShaderToy::_run(uint2 size) noexcept {
     auto device_image = _device.create_image<float>(PixelStorage::BYTE4, size);
 
     texture.with_pixels_uploading([&](void *pixels) noexcept {
-        _stream << _clear(device_image).launch(size)
+        _stream << _clear(device_image).dispatch(size)
                 << device_image.copy_to(pixels)
                 << _event.signal();
     });
@@ -44,7 +44,7 @@ void ShaderToy::_run(uint2 size) noexcept {
         auto window_size = window.size();
         if (!all(render_size == window_size.x)) {
             device_image = _device.create_image<float>(PixelStorage::BYTE4, window_size);
-            _stream << _clear(device_image).launch(window_size);
+            _stream << _clear(device_image).dispatch(window_size);
             texture.resize(window_size);
         }
 
@@ -64,7 +64,7 @@ void ShaderToy::_run(uint2 size) noexcept {
 
         auto time = window.time();
         texture.with_pixels_uploading([&](void *pixels) noexcept {
-            _stream << _shader(device_image, time, cursor).launch(window_size)
+            _stream << _shader(device_image, time, cursor).dispatch(window_size)
                     << device_image.copy_to(pixels)
                     << _event.signal();
         });
@@ -86,28 +86,26 @@ void ShaderToy::_run(uint2 size) noexcept {
     });
 }
 
-ShaderToy::ShaderToy(Device &device, std::string_view title, const Shader &shader) noexcept
+ShaderToy::ShaderToy(Device &device, std::string_view title, const MainShader &shader) noexcept
     : _device{device},
       _stream{device.create_stream()},
       _event{device.create_event()},
       _title{title},
-      _shader{[&shader](ImageFloat image, Float time, Float4 cursor) noexcept {
+      _shader{device.compile(Kernel2D{[&shader](ImageFloat image, Float time, Float4 cursor) noexcept {
           using namespace compute;
           Var xy = dispatch_id().xy();
-          Var resolution = launch_size().xy();
+          Var resolution = dispatch_size().xy();
           Var col = shader(make_uint2(xy.x, resolution.y - 1u - xy.y).cast<float2>() + 0.5f, resolution.cast<float2>(), time, cursor);
           image.write(xy, make_float4(col, 1.0f));
-      }},
-      _clear{[](ImageFloat image) noexcept {
+      }})},
+      _clear{device.compile(Kernel2D{[](ImageFloat image) noexcept {
           using namespace compute;
           Var coord = dispatch_id().xy();
-          Var rg = make_float2(coord) / make_float2(launch_size().xy());
+          Var rg = make_float2(coord) / make_float2(dispatch_size().xy());
           image.write(coord, float4(0.0f));
-      }} {
-    device.compile(_shader, _clear);
-}
+      }})} {}
 
-void ShaderToy::run(const std::filesystem::path &program, const ShaderToy::Shader &shader, uint2 size) noexcept {
+void ShaderToy::run(const std::filesystem::path &program, const ShaderToy::MainShader &shader, uint2 size) noexcept {
     Context context{program};
 
 #if defined(LUISA_BACKEND_METAL_ENABLED)

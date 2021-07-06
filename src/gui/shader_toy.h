@@ -12,6 +12,7 @@
 #include <runtime/device.h>
 #include <runtime/event.h>
 #include <runtime/stream.h>
+#include <runtime/shader.h>
 
 namespace luisa::gui {
 
@@ -27,11 +28,12 @@ using compute::ImageFloat;
 using compute::ImageVar;
 using compute::Kernel2D;
 using compute::Stream;
+using compute::Shader;
 
 class ShaderToy {
 
 public:
-    using Shader = Callable<float3(
+    using MainShader = Callable<float3(
         float2 /* xy */,
         float2 /* resolution */,
         float /* time */,
@@ -42,16 +44,16 @@ private:
     Stream _stream;
     Event _event;
     std::string_view _title;
-    Kernel2D<void(Image<float>, float, float4)> _shader;
-    Kernel2D<void(Image<float>)> _clear;
+    Shader<2, Image<float>, float, float4> _shader;
+    Shader<2, Image<float>> _clear;
 
 private:
     ShaderToy(Device &device, std::string_view title,
-              const Shader &shader) noexcept;
+              const MainShader &shader) noexcept;
     void _run(uint2 size) noexcept;
 
 public:
-    static void run(const std::filesystem::path &program, const ShaderToy::Shader &shader, uint2 size = {1280u, 720u}) noexcept;
+    static void run(const std::filesystem::path &program, const ShaderToy::MainShader &shader, uint2 size = {1280u, 720u}) noexcept;
 };
 
 }// namespace luisa::gui
