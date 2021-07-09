@@ -237,5 +237,5 @@ int main(int argc, char *argv[]) {
         return shade(ro, rd, iTime);
     };
 
-    gui::ShaderToy::run(argv[0], mainImage, 512u);
+    gui::ShaderToy::run(argv[0], mainImage, make_uint2(512u));
 }

@@ -149,14 +149,14 @@ uint2 Window::size() const noexcept {
     auto w = 0;
     auto h = 0;
     glfwGetWindowSize(_handle, &w, &h);
-    return {w, h};
+    return make_uint2(w, h);
 }
 
 uint2 Window::framebuffer_size() const noexcept {
     auto w = 0;
     auto h = 0;
     glfwGetFramebufferSize(_handle, &w, &h);
-    return {w, h};
+    return make_uint2(w, h);
 }
 
 float Window::time() const noexcept {

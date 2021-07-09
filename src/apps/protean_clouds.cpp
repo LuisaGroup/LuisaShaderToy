@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
         return make_float2x2(c, -s, s, c);
     };
 
-    static constexpr auto m3 = transpose(float3x3(
+    static constexpr auto m3 = transpose(make_float3x3(
                                    0.33338f, 0.56034f, -0.71817f,
                                    -0.87887f, 0.32651f, -0.15323f,
                                    0.15162f, 0.69596f, 0.61339f))
@@ -130,5 +130,5 @@ int main(int argc, char *argv[]) {
         return col * pow(16.0f * q.x * q.y * (1.0f - q.x) * (1.0f - q.y), 0.12f) * 0.7f + 0.3f;//Vign
     };
 
-    gui::ShaderToy::run(argv[0], mainImage, 512u);
+    gui::ShaderToy::run(argv[0], mainImage, make_uint2(512u));
 }

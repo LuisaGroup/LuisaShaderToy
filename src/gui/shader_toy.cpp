@@ -52,13 +52,13 @@ void ShaderToy::_run(uint2 size) noexcept {
             auto curr = window.cursor();
             curr = float2(curr.x, static_cast<float>(window_size.y) - curr.y);
             if (dragging) {
-                cursor = float4(curr, cursor.zw());
+                cursor = make_float4(curr, cursor.zw());
             } else {
-                cursor = float4(curr, curr * float2(1.0f, -1.0f));
+                cursor = make_float4(curr, curr * float2(1.0f, -1.0f));
                 dragging = true;
             }
         } else if (window.mouse_up(MOUSE_LEFT)) {
-            cursor = float4(cursor.xy(), -abs(cursor.zw()));
+            cursor = make_float4(cursor.xy(), -abs(cursor.zw()));
             dragging = false;
         }
 
