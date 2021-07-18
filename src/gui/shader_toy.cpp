@@ -35,9 +35,6 @@ void ShaderToy::_run(uint2 size) noexcept {
     window.run([&] {
         _event.synchronize();
         auto render_size = device_image.size();
-        ImVec2 background_size{static_cast<float>(render_size.x), static_cast<float>(render_size.y)};
-        ImGui::GetBackgroundDrawList()->AddImage(reinterpret_cast<ImTextureID *>(texture.handle()), {}, background_size);
-
         auto window_size = window.size();
         if (!all(render_size == window_size.x)) {
             device_image = _device.create_image<float>(PixelStorage::BYTE4, window_size);
@@ -60,11 +57,14 @@ void ShaderToy::_run(uint2 size) noexcept {
         }
 
         auto time = window.time();
-        texture.present([&](void *pixels) noexcept {
-            _stream << _shader(device_image, time, cursor).dispatch(window_size)
-                    << device_image.copy_to(pixels)
-                    << _event.signal();
-        });
+        if (texture.present([&](void *pixels) noexcept {
+                _stream << _shader(device_image, time, cursor).dispatch(window_size)
+                        << device_image.copy_to(pixels)
+                        << _event.signal();
+            })) {
+            ImVec2 background_size{static_cast<float>(render_size.x), static_cast<float>(render_size.y)};
+            ImGui::GetBackgroundDrawList()->AddImage(reinterpret_cast<ImTextureID *>(texture.handle()), {}, background_size);
+        }
 
         framerate.tick();
         auto fps = framerate.fps();
@@ -75,11 +75,14 @@ void ShaderToy::_run(uint2 size) noexcept {
                 ImGui::Text("Time:  %.2lfs", time);
                 ImGui::Text("FPS:   %.1lf", fps);
                 ImGui::Text("Size:  %ux%u", window_size.x, window_size.y);
-                // ImGui::Text("Mouse: (%.1f, %.1f, %.1f, %.1f)", cursor.x, cursor.y, cursor.z, cursor.w);
             });
         }
-        if (window.key_down(KEY_ESCAPE)) { window.notify_close(); }
-        if (prev_key_up && (window.key_down(KEY_LEFT_CONTROL) || window.key_down(KEY_RIGHT_CONTROL))) { show_console = !show_console; }
+        if (window.key_down(KEY_ESCAPE)) {
+            window.notify_close();
+        }
+        if (prev_key_up && (window.key_down(KEY_LEFT_CONTROL) || window.key_down(KEY_RIGHT_CONTROL))) {
+            show_console = !show_console;
+        }
         prev_key_up = window.key_up(KEY_LEFT_CONTROL) && window.key_up(KEY_RIGHT_CONTROL);
     });
 }

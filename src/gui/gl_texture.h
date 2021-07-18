@@ -34,7 +34,7 @@ private:
     [[nodiscard]] static int _gl_type(PixelFormat format) noexcept;
     [[nodiscard]] size_t _size_bytes() const noexcept;
     void _destroy() noexcept;
-    void _upload() noexcept;
+    [[nodiscard]] bool _upload() noexcept;
 
 public:
     GLTexture(PixelFormat format, uint2 size) noexcept;
@@ -49,10 +49,10 @@ public:
     void resize(uint2 size) noexcept;
 
     template<typename Update, std::enable_if_t<std::is_invocable_v<Update, void *>, int> = 0>
-    void present(Update &&update) {
+    bool present(Update &&update) {
         _back_buffer.resize(_size_bytes());
         update(_back_buffer.data());
-        _upload();
+        return _upload();
     }
 };
 
