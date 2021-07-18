@@ -45,7 +45,6 @@ private:
     Event _event;
     std::string_view _title;
     Shader<2, Image<float>, float, float4> _shader;
-    Shader<2, Image<float>> _clear;
 
 private:
     ShaderToy(Device &device, std::string_view title,
