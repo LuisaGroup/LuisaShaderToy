@@ -130,5 +130,5 @@ int main(int argc, char *argv[]) {
         return col * pow(16.0f * q.x * q.y * (1.0f - q.x) * (1.0f - q.y), 0.12f) * 0.7f + 0.3f;//Vign
     };
 
-    gui::ShaderToy::run(argv[0], mainImage, make_uint2(512u));
+    gui::ShaderToy::run(argv[0], mainImage, make_uint2(540, 360));
 }

@@ -10,12 +10,10 @@ namespace luisa::gui {
 using namespace compute;
 
 template<typename F>
-static void with_panel(const char *name, bool *show, F &&f) {
-    if (*show) {
-        ImGui::Begin(name, show, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
-        f();
-        ImGui::End();
-    }
+static void with_panel(const char *name, F &&f) {
+    ImGui::Begin(name, nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize);
+    f();
+    ImGui::End();
 }
 
 void ShaderToy::_run(uint2 size) noexcept {
@@ -23,8 +21,7 @@ void ShaderToy::_run(uint2 size) noexcept {
     Window window{_title, size};
     GLTexture texture{PixelFormat::RGBA8UNorm, size};
     auto device_image = _device.create_image<float>(PixelStorage::BYTE4, size);
-
-    texture.with_pixels_uploading([&](void *pixels) noexcept {
+    texture.present([&](void *pixels) noexcept {
         _stream << _clear(device_image).dispatch(size)
                 << device_image.copy_to(pixels)
                 << _event.signal();
@@ -63,7 +60,7 @@ void ShaderToy::_run(uint2 size) noexcept {
         }
 
         auto time = window.time();
-        texture.with_pixels_uploading([&](void *pixels) noexcept {
+        texture.present([&](void *pixels) noexcept {
             _stream << _shader(device_image, time, cursor).dispatch(window_size)
                     << device_image.copy_to(pixels)
                     << _event.signal();
@@ -72,14 +69,15 @@ void ShaderToy::_run(uint2 size) noexcept {
         framerate.tick();
         auto fps = framerate.fps();
         auto spp = framerate.count();
-        with_panel("Console", &show_console, [&] {
-            ImGui::Text("Frame: %llu", static_cast<uint64_t>(spp));
-            ImGui::Text("Time:  %.2lfs", time);
-            ImGui::Text("FPS:   %.1lf", fps);
-            ImGui::Text("Size:  %ux%u", window_size.x, window_size.y);
-            ImGui::Text("Mouse: (%.1f, %.1f, %.1f, %.1f)", cursor.x, cursor.y, cursor.z, cursor.w);
-        });
-
+        if (show_console) {
+            with_panel("Console", [&] {
+                ImGui::Text("Frame: %llu", static_cast<uint64_t>(spp));
+                ImGui::Text("Time:  %.2lfs", time);
+                ImGui::Text("FPS:   %.1lf", fps);
+                ImGui::Text("Size:  %ux%u", window_size.x, window_size.y);
+                // ImGui::Text("Mouse: (%.1f, %.1f, %.1f, %.1f)", cursor.x, cursor.y, cursor.z, cursor.w);
+            });
+        }
         if (window.key_down(KEY_ESCAPE)) { window.notify_close(); }
         if (prev_key_up && (window.key_down(KEY_LEFT_CONTROL) || window.key_down(KEY_RIGHT_CONTROL))) { show_console = !show_console; }
         prev_key_up = window.key_up(KEY_LEFT_CONTROL) && window.key_up(KEY_RIGHT_CONTROL);

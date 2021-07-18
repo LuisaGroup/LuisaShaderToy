@@ -67,11 +67,14 @@ GLTexture::GLTexture(PixelFormat format, uint2 size) noexcept
 
 GLTexture::~GLTexture() noexcept { _destroy(); }
 
-void GLTexture::upload(const void *pixels) noexcept {
-    glBindTexture(GL_TEXTURE_2D, _handle);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _size.x, _size.y, _format, _type, pixels);
+void GLTexture::_upload() noexcept {
+    if (_front_buffer.size() == _size_bytes()) {
+        glBindTexture(GL_TEXTURE_2D, _handle);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _size.x, _size.y, _format, _type, _front_buffer.data());
+    }
+    std::swap(_front_buffer, _back_buffer);
 }
 
 uint64_t GLTexture::handle() const noexcept { return _handle; }
 
-}
+}// namespace luisa::gui

@@ -26,13 +26,15 @@ private:
     int _type;
     uint _handle{0u};
     uint _pixel_size;
-    std::vector<std::byte> _pixel_buffer;
+    std::vector<std::byte> _front_buffer;
+    std::vector<std::byte> _back_buffer;
 
 private:
     [[nodiscard]] static int _gl_format(PixelFormat format) noexcept;
     [[nodiscard]] static int _gl_type(PixelFormat format) noexcept;
     [[nodiscard]] size_t _size_bytes() const noexcept;
     void _destroy() noexcept;
+    void _upload() noexcept;
 
 public:
     GLTexture(PixelFormat format, uint2 size) noexcept;
@@ -44,14 +46,13 @@ public:
     ~GLTexture() noexcept;
 
     [[nodiscard]] uint64_t handle() const noexcept;
-    void upload(const void *pixels) noexcept;
     void resize(uint2 size) noexcept;
 
     template<typename Update, std::enable_if_t<std::is_invocable_v<Update, void *>, int> = 0>
-    void with_pixels_uploading(Update &&update) {
-        _pixel_buffer.resize(_size_bytes());
-        update(_pixel_buffer.data());
-        upload(_pixel_buffer.data());
+    void present(Update &&update) {
+        _back_buffer.resize(_size_bytes());
+        update(_back_buffer.data());
+        _upload();
     }
 };
 
