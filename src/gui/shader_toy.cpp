@@ -29,7 +29,6 @@ void ShaderToy::_run(uint2 size) noexcept {
     auto dragging = false;
     Framerate framerate{0.8};
     window.run([&] {
-        _event.synchronize();
         auto render_size = device_image.size();
         auto window_size = window.size();
         if (!all(render_size == window_size.x)) {
@@ -53,6 +52,7 @@ void ShaderToy::_run(uint2 size) noexcept {
 
         auto time = window.time();
         if (texture.present([&](void *pixels) noexcept {
+                _event.synchronize();
                 _stream << _shader(device_image, time, cursor).dispatch(window_size)
                         << device_image.copy_to(pixels)
                         << _event.signal();
