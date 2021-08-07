@@ -45,12 +45,12 @@ int main(int argc, char *argv[]) {
         Var s = 0.1f;
         Var fade = 1.f;
         Var v = make_float3(0.f);
-        for (int r = 0u; r < volsteps; r++) {
+        for (auto r = 0u; r < volsteps; r++) {
             Var p = from + s * dir * .5f;
             p = abs(float3(tile) - mod(p, float3(tile * 2.f)));// tiling fold
             Var pa = 0.0f;
             Var a = 0.0f;
-            for (int i = 0u; i < iterations; i++) {
+            for (auto i = 0u; i < iterations; i++) {
                 p = abs(p) / dot(p, p) - formuparam;// the magic formula
                 a += abs(length(p) - pa);           // absolute sum of average change
                 pa = length(p);
