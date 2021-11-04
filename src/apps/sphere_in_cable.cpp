@@ -13,7 +13,7 @@ struct Ray {
     float3 dir;
 };
 
-LUISA_STRUCT(Ray, pos, dir)
+LUISA_STRUCT(Ray, pos, dir) {};
 
 int main(int argc, char *argv[]) {
 
@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
         return ite(early_return, color, lerp(float3(0.0f), float3(1.0f), ray.dir.y * ray.dir.y));
     };
 
-    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse) {
+    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse, Float3) {
         Var p = (fragCoord * 2.0f - iResolution) / min(iResolution.x, iResolution.y);
         Var color = float3(0.0f);
 

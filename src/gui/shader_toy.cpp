@@ -90,8 +90,9 @@ ShaderToy::ShaderToy(Device &device, std::string_view title, const MainShader &s
       _shader{device.compile(Kernel2D{[&shader](ImageFloat image, Float time, Float4 cursor) noexcept {
           using namespace compute;
           Var xy = dispatch_id().xy();
+          Var prev_color = image.read(xy).xyz();
           Var resolution = dispatch_size().xy();
-          Var col = shader(make_uint2(xy.x, resolution.y - 1u - xy.y).cast<float2>() + 0.5f, resolution.cast<float2>(), time, cursor);
+          Var col = shader(make_uint2(xy.x, resolution.y - 1u - xy.y).cast<float2>() + 0.5f, resolution.cast<float2>(), time, cursor, prev_color);
           image.write(xy, make_float4(col, 1.0f));
       }})} {}
 

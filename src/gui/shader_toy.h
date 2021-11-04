@@ -37,7 +37,8 @@ public:
         float2 /* xy */,
         float2 /* resolution */,
         float /* time */,
-        float4 /* cursor */)>;
+        float4 /* cursor */,
+        float3 prev_color)>;
 
 private:
     Device &_device;

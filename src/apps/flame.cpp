@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
         return make_float4(p, glow);
     };
 
-    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse) noexcept {
+    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse, Float3) noexcept {
         Var v = 2.0f * fragCoord / iResolution - 1.0f;
         v.x *= iResolution.x / iResolution.y;
 

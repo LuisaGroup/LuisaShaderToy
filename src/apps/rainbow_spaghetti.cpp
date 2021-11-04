@@ -196,7 +196,7 @@ int main(int argc, char *argv[]) {
         return ret;
     };
 
-    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse) {
+    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse, Float3) {
         static constexpr auto yscl = 720.0f;
         static constexpr auto f = 900.0f;
         static constexpr auto up = float3(0.0f, 1.0f, 0.0f);

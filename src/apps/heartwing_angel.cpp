@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
                            .5f + .5f * cos(6.f * ci + 0.7f));
     };
 
-    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse) noexcept {
+    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse, Float3) noexcept {
         static constexpr auto timeVal = 56.48f - 20.1601f;
         static constexpr auto rot = 3.141592654f * 0.5f;
         Var animWings = 0.004f * cos(iTime * 0.5f);

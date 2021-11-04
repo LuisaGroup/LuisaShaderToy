@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     static constexpr auto distfading = 0.730f;
     static constexpr auto saturation = 0.850f;
 
-    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse) noexcept {
+    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse, Float3) noexcept {
         //get coords and direction
         Var uv = fragCoord.xy() / iResolution.xy() - .5f;
         uv.y *= iResolution.y / iResolution.x;

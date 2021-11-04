@@ -8,7 +8,7 @@ using namespace luisa;
 using namespace luisa::compute;
 
 // Credit: https://www.shadertoy.com/view/WdjBWc
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {// FIXME...
 
     Callable rot = [](Float a) noexcept {
         Var s = sin(a);
@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
                    frameBox(p, float3(0.5f), 0.01f));
     };
 
-    Callable map = [&](Float3 p, Float g, Float time) noexcept {
+    Callable map = [&](Float3 p, Float &g, Float time) noexcept {
         Var de = 1e9f;
         p.z -= time * 1.5f;
         p.z = mod(p.z, 12.0f) - 6.0f;
@@ -83,37 +83,36 @@ int main(int argc, char *argv[]) {
         Var d = length(q) - 0.5f;
         g += 0.1f / (0.2f + d * d * 5.0f);// Distance glow by balkhan
         de = min(de, d + 0.2f);
-        return multiple(de, g);
+        return de;
     };
 
-    Callable calcNormal = [&](Float3 pos, Float g0, Float time) noexcept {
+    Callable calcNormal = [&](Float3 pos, Float &g, Float time) noexcept {
         auto e = float2(1.0f, -1.0f) * 0.002f;
-        auto [m1, g1] = map(pos + e.xyy(), g0, time);
-        auto [m2, g2] = map(pos + e.yyx(), g1, time);
-        auto [m3, g3] = map(pos + e.yxy(), g2, time);
-        auto [m4, g4] = map(pos + e.xxx(), g3, time);
-        return multiple(normalize(e.xyy() * m1 + e.yyx() * m2 + e.yxy() * m3 + e.xxx() * m4), g4);
+        auto m1 = map(pos + e.xyy(), g, time);
+        auto m2 = map(pos + e.yyx(), g, time);
+        auto m3 = map(pos + e.yxy(), g, time);
+        auto m4 = map(pos + e.xxx(), g, time);
+        return normalize(e.xyy() * m1 + e.yyx() * m2 + e.yxy() * m3 + e.xxx() * m4);
     };
 
-    Callable march = [&](Float3 ro, Float3 rd, Float t_near, Float t_far, Float g, Float time) noexcept {
+    Callable march = [&](Float3 ro, Float3 rd, Float t_near, Float t_far, Float &g, Float time) noexcept {
         Var t = t_near;
         Var ret = t_far;
         for (auto i : range(100)) {
-            auto [d, new_g] = map(ro + rd * t, g, time);
-            g = new_g;
+            auto d = map(ro + rd * t, g, time);
             t += d;
             if_(d < 0.001f, [&] {
                 ret = t;
                 break_();
             });
-            if_(t >= t_far, [&] { break_(); });
+            if_(t >= t_far, break_);
         }
-        return multiple(ret, g);
+        return ret;
     };
 
-    Callable calcShadow = [&](Float3 light, Float3 ld, Float len, Float g, Float time) noexcept {
-        auto [depth, new_g] = march(light, ld, 0.0f, len, g, time);
-        return multiple(step(len - depth, 0.01f), new_g);
+    Callable calcShadow = [&](Float3 light, Float3 ld, Float len, Float &g, Float time) noexcept {
+        auto depth = march(light, ld, 0.0f, len, g, time);
+        return step(len - depth, 0.01f);
     };
 
     Callable doColor = [](Float3 p) noexcept {
@@ -124,7 +123,7 @@ int main(int argc, char *argv[]) {
         return I - 2.0f * dot(N, I) * N;
     };
 
-    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float time, Float4 cursor) noexcept {
+    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float time, Float4 cursor, Float3) noexcept {
         Var uv = (fragCoord * 2.0f - iResolution.xy()) / iResolution.y;
         auto ro = float3(2.5, 3.5, 8);
         auto ta = float3(-1, 0, 0);
@@ -133,31 +132,28 @@ int main(int argc, char *argv[]) {
         Var rd = float3x3(u, cross(u, w), w) * normalize(make_float3(uv, 2.0f));
         Var col = make_float3(0.05f, 0.05f, 0.1f);
         static constexpr auto maxd = 80.0f;
-        auto [t0, g0] = march(ro, rd, 0.0f, maxd, 0.0f, time);
-        Var g = g0;
-        Var t = t0;
+        auto g = def(0.0f);
+        auto t = march(ro, rd, 0.0f, maxd, g, time);
         if_(t < maxd, [&] {
             Var p = ro + rd * t;
             col = doColor(p);
-            auto [n1, g1] = calcNormal(p, g, time);
-            Var n = n1;
+            auto n = calcNormal(p, g, time);
             auto lightPos = float3(5.0f, 5.0f, 1.0f);
             Var li = lightPos - p;
             Var len = length(li);
             li /= len;
             Var dif = clamp(dot(n, li), 0.0f, 1.0f);
-            auto [s, g2] = calcShadow(lightPos, -li, len, g1, time);
-            Var sha = s;
+            auto sha = calcShadow(lightPos, -li, len, g, time);
             col *= max(sha * dif, 0.2f);
             Var rimd = pow(clamp(1.0f - dot(reflect(-li, n), -rd), 0.0f, 1.0f), 2.5f);
             Var frn = rimd + 2.2f * (1.0f - rimd);
             col *= frn * 0.8f;
             col *= max(0.5f + 0.5f * n.y, 0.0f);
-            auto [m, g3] = map(p + n * 0.3f, g2, time);
+            auto m = map(p + n * 0.3f, g, time);
             col *= exp2(-2.f * pow(max(0.0f, 1.0f - m / 0.3f), 2.0f));
             col += float3(0.8f, 0.6f, 0.2f) * pow(clamp(dot(reflect(rd, n), li), 0.0f, 1.0f), 20.0f);
             col = lerp(float3(0.1f, 0.1f, 0.2f), col, exp(-0.001f * t * t));
-            col += float3(0.7f, 0.3f, 0.1f) * g3 * (1.5f + 0.8f * sin(time * 3.5f));
+            col += float3(0.7f, 0.3f, 0.1f) * g * (1.5f + 0.8f * sin(time * 3.5f));
             col = clamp(col, 0.0f, 1.0f);
         });
         return pow(col, float3(1.5f));

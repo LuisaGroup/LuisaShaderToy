@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
         return clamp(ic, 0.f, 1.f);
     };
 
-    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse) noexcept {
+    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse, Float3) noexcept {
         Var q = fragCoord.xy() / iResolution.xy();
         Var p = (fragCoord.xy() - 0.5f * iResolution.xy()) / iResolution.y;
         Var bsMo = (iMouse.xy() - 0.5f * iResolution.xy()) / iResolution.y;
