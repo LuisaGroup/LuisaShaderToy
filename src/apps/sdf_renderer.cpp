@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
         f *= 40.0f;
         auto i = f.cast<int>();
         $if(f < 0.0f) {
-            f = ite(i % 2 == 1, f - floor(f), floor(f) + 1.0f - f);
+            f = ite(i % 2 == 0, floor(f) + 1.0f - f, f - floor(f));
         };
         return (f - 0.2f) * (1.0f / 40.0f);
     };

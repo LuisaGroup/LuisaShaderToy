@@ -16,11 +16,6 @@ if (NOT APPLE)
     set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
     set(GLFW_LIBRARY_TYPE SHARED CACHE STRING "" FORCE)
     add_subdirectory(glfw)
-    target_link_libraries(glfw PUBLIC
-            "-framework Cocoa"
-            "-framework IOKit"
-            "-framework CoreVideo"
-            "-framework OpenGL")
 else ()
     find_package(GLFW3 REQUIRED)
 endif ()

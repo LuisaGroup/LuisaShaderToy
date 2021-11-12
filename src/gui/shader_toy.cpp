@@ -92,14 +92,16 @@ ShaderToy::ShaderToy(Device &device, std::string_view title, const MainShader &s
           Var xy = dispatch_id().xy();
           Var prev_color = image.read(xy).xyz();
           Var resolution = dispatch_size().xy();
-          Var col = shader(make_uint2(xy.x, resolution.y - 1u - xy.y).cast<float2>() + 0.5f, resolution.cast<float2>(), time, cursor, prev_color);
+          Var col = shader(make_float2(make_uint2(xy.x, resolution.y - 1u - xy.y)) + 0.5f, make_float2(resolution), time, cursor, prev_color);
           image.write(xy, make_float4(col, 1.0f));
       }})} {}
 
 void ShaderToy::run(const std::filesystem::path &program, const ShaderToy::MainShader &shader, uint2 size) noexcept {
     Context context{program};
 
-#if defined(LUISA_BACKEND_METAL_ENABLED)
+#if defined(LUISA_BACKEND_CUDA_ENABLED)
+    auto device = context.create_device("cuda", 0);
+#elif defined(LUISA_BACKEND_METAL_ENABLED)
     auto device = context.create_device("metal");
 #elif defined(LUISA_BACKEND_DX_ENABLED)
     auto device = context.create_device("dx");
