@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
             d = scene(p, iTime) + eps;
             p += d * dir;
             if_(d > eps, [&] {
-                glowed = glowed || flame(p, iTime) < .0f;
+                glowed = glowed | flame(p, iTime) < .0f;
                 glow = ite(glowed, static_cast<float>(i) / 64.0f, glow);
             });
         }

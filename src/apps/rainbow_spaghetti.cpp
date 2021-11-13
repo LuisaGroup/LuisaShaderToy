@@ -162,7 +162,7 @@ int main(int argc, char *argv[]) {
         Var t = 0.0f;
         Var m = -1.0f;
         for (auto i = 0; i < rayiter; i++) {
-            if_(!(abs(h) < precis || t > maxd), [&] {
+            if_(!(abs(h) < precis | t > maxd), [&] {
                 t += h;
                 Var res = map(ro + rd * t, iTime);
                 h = res.x;
