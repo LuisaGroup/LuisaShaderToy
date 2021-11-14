@@ -85,7 +85,7 @@ int main(int, char *argv[]) {
         Float2 uv = p.xz();
         uv.x *= 0.75f;
         Float h = 0.0f;
-        $for(_) : $range(ITER_GEOMETRY) {
+        for (auto i = 0; i < ITER_GEOMETRY; i++) {
             Float d = seaOctave((uv + (1 + time * SEA_SPEED)) * freq, choppy);
             d += seaOctave((uv - (1 + time * SEA_SPEED)) * freq, choppy);
             h += d * amp;
@@ -93,7 +93,7 @@ int main(int, char *argv[]) {
             freq *= 1.9f;
             amp *= 0.22f;
             choppy = lerp(choppy, 1.0f, 0.2f);
-        };
+        }
         return p.y - h;
     };
 
@@ -105,7 +105,7 @@ int main(int, char *argv[]) {
         Float2 uv = p.xz();
         uv.x *= 0.75f;
         Float h = 0.0f;
-        $for(_) : $range(ITER_FRAGMENT) {
+        for (auto i = 0; i < ITER_FRAGMENT; i++) {
             Float d = seaOctave((uv + (1 + time * SEA_SPEED)) * freq, choppy);
             d += seaOctave((uv - (1 + time * SEA_SPEED)) * freq, choppy);
             h += d * amp;
@@ -113,7 +113,7 @@ int main(int, char *argv[]) {
             freq *= 1.9f;
             amp *= 0.22f;
             choppy = lerp(choppy, 1.0f, 0.2f);
-        };
+        }
         return p.y - h;
     };
 
@@ -150,7 +150,7 @@ int main(int, char *argv[]) {
         };
         Float hm = map(ori + dir * tm, time);
         Float tmid = 0.0f;
-        $for(_) : $range(NUM_STEPS) {
+        for (auto i = 0; i < NUM_STEPS; i++) {
             tmid = lerp(tm, tx, hm / (hm - hx));
             p = ori + dir * tmid;
             Float hmid = map(p, time);
@@ -162,7 +162,7 @@ int main(int, char *argv[]) {
                 tm = tmid;
                 hm = hmid;
             };
-        };
+        }
     };
 
     Callable getPixel = [&](Float2 coord, Float time, Float2 iResolution) {
@@ -190,7 +190,16 @@ int main(int, char *argv[]) {
 
     Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse, Float3) {
         Float time = iTime * 0.3f + iMouse.x * 0.01f;
-        Float3 color = getPixel(fragCoord, time, iResolution);
+        std::array offsets = {
+            make_float2(-0.25f, -0.25f),
+            make_float2(-0.25f, 0.25f),
+            make_float2(0.25f, -0.25f),
+            make_float2(0.25f, 0.25f),
+        };
+        auto color = def<float3>();
+        for (auto o : offsets) {
+            color += 0.25f * getPixel(fragCoord + o, time, iResolution);
+        }
         return pow(color, 0.65f);
     };
 
