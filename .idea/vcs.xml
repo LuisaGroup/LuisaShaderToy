@@ -10,9 +10,7 @@
     <mapping directory="$PROJECT_DIR$/src/compute" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/compute/src/ext/asio" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/compute/src/ext/mimalloc" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/src/compute/src/ext/pybind11" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/compute/src/ext/spdlog" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/src/compute/src/ext/stduuid" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/compute/src/ext/xxHash" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/ext/glfw" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/ext/imgui/imgui" vcs="Git" />
