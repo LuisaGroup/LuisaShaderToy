@@ -30,5 +30,5 @@ add_subdirectory(imgui)
 target_link_libraries(luisa-shader-toy-ext INTERFACE imgui)
 
 # stb
-add_subdirectory(stb)
-target_link_libraries(luisa-shader-toy-ext INTERFACE stb)
+#add_subdirectory(stb)
+#target_link_libraries(luisa-shader-toy-ext INTERFACE stb)
