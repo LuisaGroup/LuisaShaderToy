@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {// FIXME...
     Callable pSFold = [](Float2 p, Float n) noexcept {
         Var h = floor(log2(n));
         Var a = 6.2831f * exp2(h) / n;
-        for (auto i : range(h.cast<uint>() + 2u)) {
+        for (auto i : range(cast<uint>(h) + 2u)) {
             Var v = make_float2(-cos(a), sin(a));
             Var g = dot(p, v);
             p -= (g - sqrt(g * g + 5e-3f)) * v;
