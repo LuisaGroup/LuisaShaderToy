@@ -99,16 +99,21 @@ ShaderToy::ShaderToy(Device &device, std::string_view title, const MainShader &s
 void ShaderToy::run(const std::filesystem::path &program, const ShaderToy::MainShader &shader, uint2 size) noexcept {
     Context context{program};
 
+    auto env = getenv("LUISA_COMPUTE_BACKEND");
+    luisa::string backend{env ? env : ""};
+    if (backend.empty()) {
 #if defined(LUISA_BACKEND_CUDA_ENABLED)
-    auto device = context.create_device("cuda", 0);
+        backend = "cuda";
 #elif defined(LUISA_BACKEND_METAL_ENABLED)
-    auto device = context.create_device("metal");
+        backend = "metal";
 #elif defined(LUISA_BACKEND_DX_ENABLED)
-    auto device = context.create_device("dx");
+        backend = "dx";
 #else
-    auto &&device = *static_cast<Device *>(nullptr);
+        backend = "ispc";
 #endif
+    }
 
+    auto device = context.create_device(backend);
     auto title = program.filename().replace_extension("").string();
     for (auto &c : title) { c = c == '_' ? ' ' : c; }
     auto is_first = true;

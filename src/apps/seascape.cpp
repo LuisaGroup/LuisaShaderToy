@@ -196,7 +196,7 @@ int main(int, char *argv[]) {
             make_float2(0.25f, -0.25f),
             make_float2(0.25f, 0.25f),
         };
-        auto color = def<float3>();
+        auto color = def(make_float3());
         for (auto o : offsets) {
             color += 0.25f * getPixel(fragCoord + o, time, iResolution);
         }

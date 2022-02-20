@@ -8,9 +8,18 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/compute" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/compute/src/ext/EASTL" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/compute/src/ext/EASTL/packages/EABase" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/compute/src/ext/EASTL/packages/mimalloc" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/compute/src/ext/asio" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/compute/src/ext/embree" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/compute/src/ext/fmt" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/compute/src/ext/glfw" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/compute/src/ext/imgui/imgui" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/compute/src/ext/json" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/compute/src/ext/mimalloc" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/compute/src/ext/spdlog" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/compute/src/ext/stb/stb" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/compute/src/ext/xxHash" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/ext/glfw" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/ext/imgui/imgui" vcs="Git" />
