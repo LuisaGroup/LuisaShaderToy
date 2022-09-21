@@ -79,7 +79,8 @@ int main(int argc, char *argv[]) {
         return ite(early_return, color, lerp(float3(0.0f), float3(1.0f), ray.dir.y * ray.dir.y));
     };
 
-    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse, Float3) {
+    gui::ShaderToy toy{argc, argv};
+    toy.run([&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse) {
         Var p = (fragCoord * 2.0f - iResolution) / min(iResolution.x, iResolution.y);
         Var color = float3(0.0f);
 
@@ -95,7 +96,5 @@ int main(int argc, char *argv[]) {
 
         color = trace(ray, color, 20.0f, iTime);
         return pow(color, float3(0.454545f));
-    };
-
-    gui::ShaderToy::run(argv[0], mainImage, {900u, 600u});
+    });
 }

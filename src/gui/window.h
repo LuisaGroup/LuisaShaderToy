@@ -7,7 +7,6 @@
 #include <string_view>
 #include <type_traits>
 
-#include <glad/glad.h>
 #include <imgui/imgui.h>
 
 #include <core/basic_types.h>

@@ -10,6 +10,8 @@ using namespace luisa::compute;
 // Credit: https://www.shadertoy.com/view/MdX3zr
 int main(int argc, char *argv[]) {
 
+    gui::ShaderToy toy{argc, argv};
+
     Callable noise = [](Float3 p) noexcept {
         Var i = floor(p);
         Var a = dot(i, float3(1.f, 57.f, 21.f)) + float4(0.f, 57.f, 21.f, 78.f);
@@ -50,7 +52,7 @@ int main(int argc, char *argv[]) {
         return make_float4(p, glow);
     };
 
-    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse, Float3) noexcept {
+    toy.run([&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse) noexcept {
         Var v = 2.0f * fragCoord / iResolution - 1.0f;
         v.x *= iResolution.x / iResolution.y;
 
@@ -61,7 +63,5 @@ int main(int argc, char *argv[]) {
         Var glow = p.w;
         Var col = lerp(float3(1.f, .5f, .1f), float3(0.1f, .5f, 1.f), p.y * .02f + .4f);
         return lerp(float3(0.f), col, pow(glow * 2.f, 4.f));
-    };
-
-    gui::ShaderToy::run(argv[0], mainImage, make_uint2(540, 360));
+    });
 }

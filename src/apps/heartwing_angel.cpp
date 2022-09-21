@@ -10,6 +10,8 @@ using namespace luisa::compute;
 // Credit: https://www.shadertoy.com/view/4l23zc
 int main(int argc, char *argv[]) {
 
+    gui::ShaderToy toy{argc, argv};
+
     Callable JuliaFractal = [](Float2 c, Float2 c2, Float animparam, Float anim2) noexcept {
         Var z = c;
         Var mean = 0.0f;
@@ -29,7 +31,7 @@ int main(int argc, char *argv[]) {
                            .5f + .5f * cos(6.f * ci + 0.7f));
     };
 
-    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse, Float3) noexcept {
+    toy.run([&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse) noexcept {
         static constexpr auto timeVal = 56.48f - 20.1601f;
         static constexpr auto rot = 3.141592654f * 0.5f;
         Var animWings = 0.004f * cos(iTime * 0.5f);
@@ -50,7 +52,5 @@ int main(int argc, char *argv[]) {
         color *= 0.3333f;
         color = float3(1.0f) - color.zyx();
         return color;
-    };
-
-    gui::ShaderToy::run(argv[0], mainImage, make_uint2(512u));
+    });
 }

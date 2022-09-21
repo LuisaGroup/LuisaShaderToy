@@ -4,8 +4,8 @@
 
 #include <iostream>
 
-#include <GLFW/glfw3.h>
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
 
 #include <core/logging.h>
@@ -29,8 +29,9 @@ Window::Window(std::string_view title, uint32_t width, uint32_t height) noexcept
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
-    _handle = glfwCreateWindow(static_cast<int>(width), static_cast<int>(height), std::string{title}.c_str(), nullptr, nullptr);
+    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    _handle = glfwCreateWindow(static_cast<int>(width), static_cast<int>(height),
+                               std::string{title}.c_str(), nullptr, nullptr);
     if (_handle == nullptr) {
         LUISA_ERROR_WITH_LOCATION("Failed to create window '{}' with size {}x{}.", title, width, height);
     }

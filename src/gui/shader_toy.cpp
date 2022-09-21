@@ -5,6 +5,10 @@
 #include <core/basic_types.h>
 #include <gui/shader_toy.h>
 
+#if LUISA_SHADERTOY_HAS_OPENCV
+#include <opencv2/opencv.hpp>
+#endif
+
 namespace luisa::gui {
 
 using namespace compute;
@@ -16,11 +20,20 @@ static void with_panel(const char *name, F &&f) {
     ImGui::End();
 }
 
-void ShaderToy::_run(uint2 size) noexcept {
+void ShaderToy::run(const MainShader &main_shader) noexcept {
 
-    Window window{_title, size};
-    GLTexture texture{PixelFormat::RGBA8UNorm, size};
-    auto device_image = _device.create_image<float>(PixelStorage::BYTE4, size);
+    auto shader = _device->compile(Kernel2D{[&main_shader](ImageFloat image, Float time, Float4 cursor) noexcept {
+        using namespace compute;
+        Var xy = dispatch_id().xy();
+        Var resolution = dispatch_size().xy();
+        Var col = main_shader(make_float2(make_uint2(xy.x, resolution.y - 1u - xy.y)) + 0.5f,
+                              make_float2(resolution), time, cursor);
+        image.write(xy, make_float4(col, 1.0f));
+    }});
+
+    Window window{_title, _size};
+    GLTexture texture{PixelFormat::RGBA8UNorm, _size};
+    auto device_image = _device->create_image<float>(PixelStorage::BYTE4, _size);
     _stream << _event.signal();
 
     auto prev_key_up = false;
@@ -31,11 +44,6 @@ void ShaderToy::_run(uint2 size) noexcept {
     window.run([&] {
         auto render_size = device_image.size();
         auto window_size = window.size();
-        if (!all(render_size == window_size.x)) {
-            device_image = _device.create_image<float>(PixelStorage::BYTE4, window_size);
-            texture.resize(window_size);
-        }
-
         if (window.mouse_down(MOUSE_LEFT)) {
             auto curr = window.cursor();
             curr = float2(curr.x, static_cast<float>(window_size.y) - curr.y);
@@ -50,10 +58,10 @@ void ShaderToy::_run(uint2 size) noexcept {
             dragging = false;
         }
 
-        auto time = window.time();
+        auto time = _step == 0. ? window.time() : static_cast<double>(framerate.count()) * _step;
         if (texture.present([&](void *pixels) noexcept {
                 _event.synchronize();
-                _stream << _shader(device_image, time, cursor).dispatch(window_size)
+                _stream << shader(device_image, static_cast<float>(time), cursor).dispatch(window_size)
                         << device_image.copy_to(pixels)
                         << _event.signal();
             })) {
@@ -82,46 +90,54 @@ void ShaderToy::_run(uint2 size) noexcept {
     });
 }
 
-ShaderToy::ShaderToy(Device &device, std::string_view title, const MainShader &shader) noexcept
-    : _device{device},
-      _stream{device.create_stream()},
-      _event{device.create_event()},
-      _title{title},
-      _shader{device.compile(Kernel2D{[&shader](ImageFloat image, Float time, Float4 cursor) noexcept {
-          using namespace compute;
-          Var xy = dispatch_id().xy();
-          Var prev_color = image.read(xy).xyz();
-          Var resolution = dispatch_size().xy();
-          Var col = shader(make_float2(make_uint2(xy.x, resolution.y - 1u - xy.y)) + 0.5f, make_float2(resolution), time, cursor, prev_color);
-          image.write(xy, make_float4(col, 1.0f));
-      }})} {}
-
-void ShaderToy::run(const std::filesystem::path &program, const ShaderToy::MainShader &shader, uint2 size) noexcept {
-    Context context{program};
-
-    auto env = getenv("LUISA_COMPUTE_BACKEND");
-    luisa::string backend{env ? env : ""};
-    if (backend.empty()) {
-#if defined(LUISA_BACKEND_CUDA_ENABLED)
-        backend = "cuda";
-#elif defined(LUISA_BACKEND_METAL_ENABLED)
-        backend = "metal";
-#elif defined(LUISA_BACKEND_DX_ENABLED)
-        backend = "dx";
-#else
-        backend = "ispc";
-#endif
+ShaderToy::ShaderToy(int argc, const char *const *argv) noexcept
+    : _context{argv[0]} {
+    Context context{argv[0]};
+    luisa::string backend{"unknown"};
+    auto device_id = 0u;
+    for (auto i = 1u; i < argc; i++) {
+        using namespace std::string_view_literals;
+        auto next_arg = [&] {
+            if (i + 1u >= argc) {
+                LUISA_ERROR_WITH_LOCATION(
+                    "Missing argument for option: ",
+                    argv[i]);
+            }
+            return argv[++i];
+        };
+        if (argv[i] == "-b"sv || argv[i] == "--backend"sv) {
+            backend = next_arg();
+        } else if (argv[i] == "-s"sv || argv[i] == "--size"sv) {
+            auto s = next_arg();
+            auto n = std::sscanf(s, "%ux%u", &_size.x, &_size.y);
+            LUISA_ASSERT(n != 0, "Invalid size: {}", s);
+            if (n == 1) { _size.y = _size.x; }
+            _size = luisa::clamp(_size, 1u, 4096u);
+        } else if (argv[i] == "-d"sv || argv[i] == "--device"sv) {
+            device_id = std::atoi(next_arg());
+        } else if (argv[i] == "--step"sv) {
+            _step = std::clamp(std::atof(next_arg()), 0., 1000.);
+        } else if (argv[i] == "-o"sv || argv[i] == "--output"sv) {
+            _dump_file = next_arg();
+        } else if (argv[i] == "-n"sv || argv[i] == "--frames"sv) {
+            _dump_frames = std::atoi(next_arg());
+        } else if (argv[i] == "--fps"sv) {
+            _dump_fps = std::clamp(std::atof(next_arg()), 1., 200.);
+        } else {
+            LUISA_ERROR_WITH_LOCATION("Unknown option: ", argv[i]);
+        }
     }
-
-    auto device = context.create_device(backend);
-    auto title = program.filename().replace_extension("").string();
-    for (auto &c : title) { c = c == '_' ? ' ' : c; }
+    _title = std::filesystem::canonical(argv[0]).filename().replace_extension("").string();
+    for (auto &c : _title) { c = c == '_' ? ' ' : c; }
     auto is_first = true;
-    for (auto &c : title) {
+    for (auto &c : _title) {
         if (is_first) { c = static_cast<char>(std::toupper(c)); }
         is_first = c == ' ';
     }
-    ShaderToy{device, title, shader}._run(size);
+    _device = luisa::make_unique<Device>(context.create_device(
+        backend, luisa::format("{{\"index\": {}}}", device_id)));
+    _stream = _device->create_stream();
+    _event = _device->create_event();
 }
 
 }// namespace luisa::gui

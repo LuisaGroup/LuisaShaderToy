@@ -10,6 +10,8 @@ using namespace luisa::compute;
 // Credit: https://www.shadertoy.com/view/WdjBWc
 int main(int argc, char *argv[]) {// FIXME...
 
+    gui::ShaderToy toy{argc, argv};
+
     Callable rot = [](Float a) noexcept {
         Var s = sin(a);
         Var c = cos(a);
@@ -123,7 +125,7 @@ int main(int argc, char *argv[]) {// FIXME...
         return I - 2.0f * dot(N, I) * N;
     };
 
-    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float time, Float4 cursor, Float3) noexcept {
+    toy.run([&](Float2 fragCoord, Float2 iResolution, Float time, Float4 cursor) noexcept {
         Var uv = (fragCoord * 2.0f - iResolution.xy()) / iResolution.y;
         auto ro = float3(2.5, 3.5, 8);
         auto ta = float3(-1, 0, 0);
@@ -157,7 +159,5 @@ int main(int argc, char *argv[]) {// FIXME...
             col = clamp(col, 0.0f, 1.0f);
         });
         return pow(col, float3(1.5f));
-    };
-
-    gui::ShaderToy::run(argv[0], mainImage, make_uint2(540u, 360u));
+    });
 }

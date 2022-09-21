@@ -125,7 +125,8 @@ int main(int argc, char *argv[]) {
         };
     };
 
-    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse, Float3 prev_c) noexcept {
+    gui::ShaderToy toy{argc, argv};
+    toy.run([&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse) noexcept {
         auto aspect_ratio = iResolution.x / iResolution.y;
         auto pos = def(camera_pos);
         auto seed = tea(fragCoord.x.cast<uint>(), fragCoord.y.cast<uint>()) + cast<uint>(iTime * 1e4f);
@@ -154,7 +155,5 @@ int main(int argc, char *argv[]) {
             throughput *= c;
         };
         return make_float3(throughput * hit_light);
-    };
-
-    gui::ShaderToy::run(argv[0], mainImage, make_uint2(1280, 720));
+    });
 }

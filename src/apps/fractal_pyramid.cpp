@@ -10,6 +10,8 @@ using namespace luisa::compute;
 // Credit: https://www.shadertoy.com/view/tsXBzS
 int main(int argc, char *argv[]) {
 
+    gui::ShaderToy toy{argc, argv};
+
     Callable palette = [](Float d) noexcept {
         return lerp(float3(0.2f, 0.7f, 0.9f), float3(1.0f, 0.0f, 1.0f), d);
     };
@@ -44,7 +46,7 @@ int main(int argc, char *argv[]) {
         return make_float4(col, 1.0f / (d * 100.0f));
     };
 
-    Callable shader = [&](Float2 xy, Float2 resolution, Float time, Float4, Float3) noexcept {
+    toy.run([&](Float2 xy, Float2 resolution, Float time, Float4) noexcept {
         Var uv = (xy - resolution * 0.5f) / min(resolution.x, resolution.y);
         Var ro = make_float3(rotate(make_float2(0.0f, -50.0f), time), 0.0f).xzy();
         Var cf = normalize(-ro);
@@ -53,7 +55,5 @@ int main(int argc, char *argv[]) {
         Var uuv = ro + cf * 3.0f + uv.x * cs + uv.y * cu;
         Var rd = normalize(uuv - ro);
         return rm(ro, rd, time).xyz();
-    };
-
-    gui::ShaderToy::run(argv[0], shader, uint2(540, 360));
+    });
 }

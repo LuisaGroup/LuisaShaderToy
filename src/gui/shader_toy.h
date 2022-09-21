@@ -37,23 +37,25 @@ public:
         float2 /* xy */,
         float2 /* resolution */,
         float /* time */,
-        float4 /* cursor */,
-        float3 prev_color)>;
+        float4 /* cursor */)>;
 
 private:
-    Device &_device;
+    Context _context;
+    luisa::unique_ptr<Device> _device;
     Stream _stream;
     Event _event;
-    std::string_view _title;
-    Shader<2, Image<float>, float, float4> _shader;
-
-private:
-    ShaderToy(Device &device, std::string_view title,
-              const MainShader &shader) noexcept;
-    void _run(uint2 size) noexcept;
+    std::string _title{};
+    uint2 _size{1280u, 720u};
+    double _step{.1};
+    luisa::string _dump_file{};
+    uint _dump_frames{1u};
+    double _dump_fps{24.};
 
 public:
-    static void run(const std::filesystem::path &program, const ShaderToy::MainShader &shader, uint2 size = {1280u, 720u}) noexcept;
+    ShaderToy(int argc, const char *const *argv) noexcept;
+    void run(const MainShader &shader) noexcept;
+    [[nodiscard]] auto &device() noexcept { return *_device; }
+    [[nodiscard]] auto &stream() noexcept { return _stream; }
 };
 
 }// namespace luisa::gui

@@ -196,7 +196,8 @@ int main(int argc, char *argv[]) {
         return ret;
     };
 
-    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse, Float3) {
+    gui::ShaderToy toy{argc, argv};
+    toy.run([&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse) {
         static constexpr auto yscl = 720.0f;
         static constexpr auto f = 900.0f;
         static constexpr auto up = float3(0.0f, 1.0f, 0.0f);
@@ -235,7 +236,5 @@ int main(int argc, char *argv[]) {
         Var ro = tgt + R * Rx * Ry * Rt * (cpos - tgt);
 
         return shade(ro, rd, iTime);
-    };
-
-    gui::ShaderToy::run(argv[0], mainImage, make_uint2(512u));
+    });
 }

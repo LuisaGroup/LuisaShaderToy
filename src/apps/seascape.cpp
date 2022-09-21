@@ -9,7 +9,7 @@ using namespace luisa;
 using namespace compute;
 
 // Credit: https://www.shadertoy.com/view/Ms2SD1
-int main(int, char *argv[]) {
+int main(int argc, char *argv[]) {
 
     constexpr int   NUM_STEPS = 8;
     constexpr float PI        = 3.14159265f;
@@ -188,7 +188,8 @@ int main(int, char *argv[]) {
             pow(smoothstep(0.0f, -0.02f, dir.y), 0.2f));
     };
 
-    Callable mainImage = [&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse, Float3) {
+    gui::ShaderToy toy{argc, argv};
+    toy.run([&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse) {
         Float time = iTime * 0.3f + iMouse.x * 0.01f;
         std::array offsets = {
             make_float2(-0.25f, -0.25f),
@@ -201,7 +202,5 @@ int main(int, char *argv[]) {
             color += 0.25f * getPixel(fragCoord + o, time, iResolution);
         }
         return pow(color, 0.65f);
-    };
-
-    gui::ShaderToy::run(argv[0], mainImage, make_uint2(1280, 720));
+    });
 }
