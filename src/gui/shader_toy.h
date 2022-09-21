@@ -43,13 +43,16 @@ private:
     Context _context;
     luisa::unique_ptr<Device> _device;
     Stream _stream;
-    Event _event;
     std::string _title{};
     uint2 _size{1280u, 720u};
     double _step{.1};
     luisa::string _dump_file{};
     uint _dump_frames{1u};
     double _dump_fps{24.};
+
+private:
+    void _run_display(const compute::Shader2D<Image<float>, float, float4> &shader) noexcept;
+    void _run_dump(const compute::Shader2D<Image<float>, float, float4> &shader) noexcept;
 
 public:
     ShaderToy(int argc, const char *const *argv) noexcept;
