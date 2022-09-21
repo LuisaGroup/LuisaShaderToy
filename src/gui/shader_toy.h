@@ -45,7 +45,7 @@ private:
     Stream _stream;
     std::string _title{};
     uint2 _size{1280u, 720u};
-    double _step{.1};
+    double _step{0.};
     luisa::string _dump_file{};
     uint _dump_frames{1u};
     double _dump_fps{24.};
@@ -59,6 +59,7 @@ public:
     void run(const MainShader &shader) noexcept;
     [[nodiscard]] auto &device() noexcept { return *_device; }
     [[nodiscard]] auto &stream() noexcept { return _stream; }
+    [[nodiscard]] auto size() const noexcept { return _size; }
 };
 
 }// namespace luisa::gui

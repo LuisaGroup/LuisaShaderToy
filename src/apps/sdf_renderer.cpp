@@ -12,8 +12,6 @@ using namespace luisa::compute;
 // Credit: https://github.com/taichi-dev/taichi/blob/master/examples/rendering/sdf_renderer.py
 int main(int argc, char *argv[]) {
 
-    log_level_verbose();
-
     static constexpr auto max_ray_depth = 6;
     static constexpr auto eps = 1e-4f;
     static constexpr auto inf = 1e10f;
@@ -126,6 +124,12 @@ int main(int argc, char *argv[]) {
     };
 
     gui::ShaderToy toy{argc, argv};
+    auto accum = toy.device().create_image<float>(PixelStorage::FLOAT4, toy.size());
+    auto clear = toy.device().compile<2>([&] {
+        accum.write(dispatch_id().xy(), make_float4());
+    });
+    toy.stream() << clear().dispatch(toy.size());
+
     toy.run([&](Float2 fragCoord, Float2 iResolution, Float iTime, Float4 iMouse) noexcept {
         auto aspect_ratio = iResolution.x / iResolution.y;
         auto pos = def(camera_pos);
@@ -154,6 +158,9 @@ int main(int argc, char *argv[]) {
             pos = hit_pos + 1e-4f * d;
             throughput *= c;
         };
-        return make_float3(throughput * hit_light);
+        auto old = accum.read(make_uint2(fragCoord));
+        auto new_col = lerp(old.xyz(), throughput * hit_light, 1.f / (old.w + 1.f));
+        accum.write(make_uint2(fragCoord), make_float4(new_col, old.w + 1.f));
+        return sqrt(new_col * 2.5f);
     });
 }

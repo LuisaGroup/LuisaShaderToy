@@ -70,7 +70,7 @@ ShaderToy::ShaderToy(int argc, const char *const *argv) noexcept
         } else if (argv[i] == "--fps"sv) {
             _dump_fps = std::clamp(std::atof(next_arg()), 1., 200.);
         } else {
-            LUISA_ERROR_WITH_LOCATION("Unknown option: ", argv[i]);
+            LUISA_ERROR_WITH_LOCATION("Unknown option: {}", argv[i]);
         }
     }
     _title = std::filesystem::canonical(argv[0]).filename().replace_extension("").string();
