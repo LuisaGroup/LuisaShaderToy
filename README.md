@@ -2,6 +2,10 @@
 
 LuisaShaderToy is a playground for testing shaders with [LuisaCompute](https://github.com/LuisaGroup/LuisaCompute).
 
+See `src/apps` for some demo toys we port from the original [ShaderToy](https://www.shadertoy.com) website.
+
+# Demos
+
 https://user-images.githubusercontent.com/7614925/191537869-baf78cde-dbf7-46b4-860f-f87470e800ea.mp4
 
 
