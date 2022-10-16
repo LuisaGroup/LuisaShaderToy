@@ -28,7 +28,7 @@ jobs:
       #          linux-local-args: '["--toolkit"]'
       - name: "Configure and Build"
         run: |
-          cmake -S . -B build -G Ninja -D CMAKE_BUILD_TYPE=Release -D CMAKE_C_COMPILER=gcc-11 -D CMAKE_CXX_COMPILER=g++-11 -D LLVM_DIR=/usr/lib/llvm-14
+          cmake -S . -B build -G Ninja -D CMAKE_BUILD_TYPE=Release -D CMAKE_C_COMPILER=gcc-11 -D CMAKE_CXX_COMPILER=g++-11 -D LLVM_ROOT=/usr/lib/llvm-14
           cmake --build build
 
   build-macos:
@@ -43,7 +43,7 @@ jobs:
       - name: "Configure and Build"
         run: |
           export PATH=$PATH:/usr/local/opt/llvm/bin
-          cmake -S . -B build -G Ninja -D CMAKE_BUILD_TYPE=Release -D LUISA_COMPUTE_ENABLE_METAL=OFF -D CMAKE_C_COMPILER=clang -D CMAKE_CXX_COMPILER=clang++
+          cmake -S . -B build -G Ninja -D CMAKE_BUILD_TYPE=Release -D LUISA_COMPUTE_ENABLE_METAL=OFF -D CMAKE_C_COMPILER=clang-15 -D CMAKE_CXX_COMPILER=clang++-15
           cmake --build build
 
   build-windows:
