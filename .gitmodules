@@ -6,7 +6,7 @@
 	url = https://github.com/ocornut/imgui.git
 [submodule "src/compute"]
 	path = src/compute
-	url = git@github.com:Mike-Leo-Smith/LuisaCompute.git
+	url = https://github.com/LuisaGroup/LuisaRender.git
 [submodule "src/ext/stb/stb"]
 	path = src/ext/stb/stb
 	url = https://github.com/nothings/stb.git
